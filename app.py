@@ -6,6 +6,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from supabase import create_client, Client
 import asyncio
+import numpy as np
 
 # Initialize Supabase client
 supabaseUrl = 'https://gippopxafisxpvrkkplt.supabase.co'
