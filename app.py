@@ -64,15 +64,10 @@ async def fetch_categories():
 import uuid
 
 # Function to fetch expenses with filters and pagination
+import pandas as pd
+
 async def fetch_expenses(user_id, month_num=None, year=None, category_id=None, offset=0, limit=10):
     try:
-        # Ensure user_id and category_id are integers (UUIDs are not required here)
-        # If they are UUIDs passed as strings, convert them to integers
-        if isinstance(user_id, str):
-            user_id = int(user_id)  # Convert to integer if user_id is a string
-        if category_id and isinstance(category_id, str):
-            category_id = int(category_id)  # Convert to integer if category_id is a string
-
         # Prepare parameters for the RPC call
         params = {
             "user_id_input": user_id,  # user_id is an integer from the `users` table
@@ -89,7 +84,13 @@ async def fetch_expenses(user_id, month_num=None, year=None, category_id=None, o
         # Convert response to a DataFrame
         if response.data:
             df = pd.DataFrame(response.data)
+
+            # Convert all int64 columns to int (Python native int type)
+            df = df.applymap(lambda x: int(x) if isinstance(x, pd.Int64Dtype) else x)
+
+            # Ensure column names match the expected output
             df.columns = ['Expense ID', 'Expense Name', 'Amount', 'Expense Date', 'Category']
+
             return df
         else:
             return pd.DataFrame(columns=['Expense ID', 'Expense Name', 'Amount', 'Expense Date', 'Category'])
