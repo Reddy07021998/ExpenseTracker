@@ -37,43 +37,37 @@ async def authenticate_user(username, password):
 def hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
-def register_user(username, email, password):
+# Helper function to run async code within Streamlit's synchronous environment
+def run_async(coroutine_func):
+    return asyncio.run(coroutine_func)
+
+# Function to register a new user in Supabase
+async def register_user(username, email, password):
     try:
-        # Check if user already exists by email
-        existing_user_response = supabase.auth.api.get_user_by_email(email)
-        if existing_user_response.data:
-            st.error("Email already registered. Please use a different email.")
+        # Hash the password
+        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+        # Check if the username already exists
+        existing_user = supabase.table('users').select('user_id').eq('username', username).execute()
+
+        if existing_user.data:
+            st.error("Username already exists! Please choose a different one.")
             return
 
-        # Register the user in Supabase Auth
-        user_response = supabase.auth.sign_up({
-            "email": email,
-            "password": password,
-        })
+        # Insert the new user into the 'users' table in Supabase
+        result = supabase.table('users').insert({
+            'username': username,
+            'email': email,
+            'password_hash': hashed_password
+        }).execute()
 
-        # Check if user registration is successful
-        if 'user' in user_response.data:
-            user_id = user_response.data['user']['id']  # User ID
-            user_data = {
-                "username": username,
-                "email": email,
-                "user_id": user_id,  # Store user_id for future reference
-            }
-
-            # Insert the user into your database table (e.g., users)
-            response = supabase.table("users").insert(user_data).execute()
-            
-            if response.status_code == 201:
-                st.success("User registered successfully! You can now log in.")
-            else:
-                st.error(f"Failed to insert user data into database: {response.error}")
+        if result.status_code == 201:
+            st.success("User registered successfully! You can now log in.")
         else:
-            st.error("Registration failed. Please try again.")
-
+            st.error("Error registering user. Please try again.")
     except Exception as e:
         st.error(f"Error registering user: {str(e)}")
-        logging.error(f"Error registering user: {str(e)}")
-
+        
 # Wrapper to handle async calls in Streamlit
 def run_async(coro):
     return asyncio.run(coro)
@@ -247,7 +241,6 @@ if st.session_state.current_screen == "login":
         st.session_state.current_screen = "register"
         st.rerun()
 
-# Revised Registration Screen
 # Registration Screen
 elif st.session_state.current_screen == "register":
     st.title("Register for Expense Tracker")
@@ -263,11 +256,13 @@ elif st.session_state.current_screen == "register":
         if password != confirm_password:
             st.error("Passwords do not match.")
         else:
-            # Async function call
+            # Run the registration process
             run_async(register_user(username, email, password))
+            # After successful registration, go back to the login screen
             st.session_state.current_screen = "login"
             st.rerun()
 
+    # Button to go back to the login screen
     if st.button("Back to Login"):
         st.session_state.current_screen = "login"
         st.rerun()
