@@ -6,7 +6,6 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from supabase import create_client, Client
 import asyncio
-import numpy as np
 
 # Initialize Supabase client
 supabaseUrl = 'https://gippopxafisxpvrkkplt.supabase.co'
@@ -62,50 +61,66 @@ async def fetch_categories():
         return pd.DataFrame(columns=['category_id', 'category_name'])
 
 # Function to fetch expenses with filters and pagination
+import pandas as pd
+import numpy as np  # Required for handling types
+import streamlit as st
+
 async def fetch_expenses(user_id, month_num=None, year=None, category_id=None, offset=0, limit=10):
-  try:
-    # Handle category_id to ensure it is an integer (in case it's passed as np.int64)
-    if isinstance(category_id, np.int64):
-      category_id = int(category_id)
+    try:
+        # Handle category_id to ensure it is an integer (in case it's passed as np.int64)
+        if isinstance(category_id, np.int64):
+            category_id = int(category_id)
+        
+        # Prepare parameters for the RPC call
+        params = {
+            "user_id_input": user_id,  # user_id is an integer from the `users` table
+            "month_num_input": month_num,
+            "year_input": year,
+            "category_id_input": category_id,
+            "offset_input": offset,
+            "limit_input": limit
+        }
 
-    # Prepare parameters for the RPC call
-    params = {
-      "user_id_input": user_id,  # user_id is an integer from the `users` table
-      "month_num_input": month_num,
-      "year_input": year,
-      "category_id_input": category_id,
-      "offset_input": offset,
-      "limit_input": limit
-    }
+        # Call the RPC function or table query
+        response = supabase.rpc("fetch_expenses", params).execute()
 
-    # Call the RPC function or table query
-    response = supabase.rpc("fetch_expenses", params).execute()
+        # Debug: Print raw response data to inspect
+        st.write("Raw response data:", response.data)
 
-    # Convert response to a DataFrame
-    if response.data:
-      cleaned_data = []
-      for row in response.data:
-        cleaned_row = {}
-        for key, value in row.items():
-          # If the value is of type np.int64, convert it to a regular int
-          if isinstance(value, np.int64):
-            cleaned_row[key] = int(value)
-          else:
-            cleaned_row[key] = value
-        cleaned_data.append(cleaned_row)
+        # Convert response to a DataFrame
+        if response.data:
+            cleaned_data = []
 
-      df = pd.DataFrame(cleaned_data)
+            # Ensure all int64 are converted to Python native int (serializable by JSON)
+            for row in response.data:
+                cleaned_row = {}
+                for key, value in row.items():
+                    # If the value is of type np.int64, convert it to a regular int
+                    if isinstance(value, np.int64):
+                        cleaned_row[key] = int(value)
+                    else:
+                        cleaned_row[key] = value
+                cleaned_data.append(cleaned_row)
 
-      # Rename columns
-      df.columns = ['Expense ID', 'Expense Name', 'Amount', 'Expense Date', 'Category']
+            # Convert cleaned data to DataFrame
+            df = pd.DataFrame(cleaned_data)
 
-      return df
-    else:
-      return pd.DataFrame(columns=['Expense ID', 'Expense Name', 'Amount', 'Expense Date', 'Category'])
+            # Debug: Check DataFrame types before conversion
+            st.write("DataFrame types before conversion:", df.dtypes)
 
-  except Exception as e:
-    st.error(f"Error fetching expenses: {e}")
-    return pd.DataFrame(columns=['Expense ID', 'Expense Name', 'Amount', 'Expense Date', 'Category'])
+            # Rename columns
+            df.columns = ['Expense ID', 'Expense Name', 'Amount', 'Expense Date', 'Category']
+
+            # Debug: Check DataFrame after renaming columns
+            st.write("DataFrame after column rename:", df)
+
+            return df
+        else:
+            return pd.DataFrame(columns=['Expense ID', 'Expense Name', 'Amount', 'Expense Date', 'Category'])
+
+    except Exception as e:
+        st.error(f"Error fetching expenses: {e}")
+        return pd.DataFrame(columns=['Expense ID', 'Expense Name', 'Amount', 'Expense Date', 'Category'])
 
 # Function to update an expense based on expense_id and user_id
 async def update_expense(expense_id, user_id, expense_name, amount, expense_date, category_id):
@@ -294,9 +309,6 @@ elif st.session_state.current_screen == "heatmap_view":
     if st.button("⬅️"):
         st.session_state.current_screen = "main_menu"
         st.rerun()
-import pandas as pd
-import numpy as np  # Required for handling types
-import streamlit as st
 
 # Add Expense Screen
 elif st.session_state.current_screen == "add_expense":
@@ -306,15 +318,13 @@ elif st.session_state.current_screen == "add_expense":
     amount = st.number_input("Amount", min_value=0.01 , step=0.01)
     expense_date = st.date_input("Expense Date")
 
-    categories_df = run_async(fetch_categories())  # Fetch categories
+    categories_df = run_async(fetch_categories())
 
     category_names = categories_df['category_name'].tolist()
     category = st.selectbox("Category", category_names)
 
     if st.button("Save Expense"):
-        # Ensure category_id is retrieved correctly
         category_id = categories_df[categories_df['category_name'] == category]['category_id'].values[0]
-        # Adding the expense using the API call
         run_async(add_expense(st.session_state.user_id, expense_name, amount, expense_date, category_id))
         st.session_state.current_screen = "main_menu"
         st.rerun()
@@ -347,8 +357,6 @@ elif st.session_state.current_screen == "edit_expense":
             expense_name = st.text_input("Expense Name", expense_details['Expense Name'])
             amount = st.number_input("Amount", min_value=0.0, step=0.01, value=float(expense_details['Amount']))
             expense_date = st.date_input("Expense Date", pd.to_datetime(expense_details['Expense Date']))
-            
-            # Fetch categories for the select box
             categories_df = run_async(fetch_categories())
             category_names = categories_df['category_name'].tolist()
             current_category = expense_details['Category']
@@ -403,4 +411,3 @@ elif st.session_state.current_screen == "confirm_delete":
             if st.button("Cancel"):
                 st.session_state.current_screen = "main_menu"
                 st.rerun()
-				
