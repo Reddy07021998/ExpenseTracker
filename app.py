@@ -229,51 +229,29 @@ if st.session_state.current_screen == "login":
         st.rerun()
 
 # Revised Registration Screen
+# Registration Screen
 elif st.session_state.current_screen == "register":
     st.title("Register for Expense Tracker")
+
     with st.form("register_form"):
         username = st.text_input("Username")
         email = st.text_input("Email")
         password = st.text_input("Password", type="password")
         confirm_password = st.text_input("Confirm Password", type="password")
-        
         register_button = st.form_submit_button("Register")
-        
-        if register_button:
-            if not username.strip() or not email.strip():
-                st.error("Username and email are required.")
-            elif password != confirm_password:
-                st.error("Passwords do not match.")
-            elif len(password) < 6:
-                st.error("Password must be at least 6 characters long.")
-            else:
-                try:
-                    # Check if the username or email already exists
-                    user_check = supabase.table('users').select('username').eq('username', username).execute()
-                    email_check = supabase.table('users').select('email').eq('email', email).execute()
-                    
-                    if user_check.data:
-                        st.error("Username already exists. Please choose a different username.")
-                    elif email_check.data:
-                        st.error("Email already registered. Please use a different email.")
-                    else:
-                        # Register the user
-                        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-                        response = supabase.table('users').insert({
-                            'username': username,
-                            'email': email,
-                            'password_hash': hashed_password
-                        }).execute()
 
-                        if response and response.status_code in [200, 201]:
-                            st.success("User registered successfully! You can now log in.")
-                            st.session_state.current_screen = "login"
-                            st.rerun()
-                        else:
-                            st.error("Failed to register user. Please try again.")
-                except Exception as e:
-                    logging.error(f"Error registering user: {e}")
-                    st.error("An error occurred during registration. Please try again later.")
+    if register_button:
+        if password != confirm_password:
+            st.error("Passwords do not match.")
+        else:
+            # Async function call
+            run_async(register_user(username, email, password))
+            st.session_state.current_screen = "login"
+            st.rerun()
+
+    if st.button("Back to Login"):
+        st.session_state.current_screen = "login"
+        st.rerun()
 
 # Main Menu Screen
 elif st.session_state.current_screen == "main_menu":
