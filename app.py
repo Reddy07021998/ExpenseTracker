@@ -147,16 +147,14 @@ async def fetch_expenses(user_id, month_num=None, year=None, category_id=None, o
 # Function to update an expense based on expense_id and user_id
 async def update_expense(expense_id, user_id, expense_name, amount, expense_date, category_id):
     try:
-        # Convert int64 to regular int for all fields that are integers
-        expense_id = int(expense_id)  # Ensure expense_id is a regular int
-        user_id = int(user_id)  # Ensure user_id is a regular int
-        category_id = int(category_id)  # Ensure category_id is a regular int
-        amount = float(amount)  # Ensure amount is a float
+        # Ensure proper conversion for JSON serialization
+        expense_id = int(expense_id)  # Convert expense_id to int if it's not already
+        user_id = int(user_id)  # Convert user_id to int if it's not already
+        amount = float(amount)  # Convert amount to float
+        category_id = int(category_id)  # Convert category_id to int if it's not already
+        expense_date = str(expense_date)  # Ensure expense_date is a string in ISO format
 
-        # Convert date to string if necessary
-        expense_date = str(expense_date)  # Ensure the date is a string in ISO format
-
-        # Update the expense
+        # Update the expense record in Supabase table
         response = supabase.table('expenses').update({
             'expense_name': expense_name,
             'amount': amount,
@@ -164,6 +162,7 @@ async def update_expense(expense_id, user_id, expense_name, amount, expense_date
             'category_id': category_id
         }).eq('expense_id', expense_id).eq('user_id', user_id).execute()
 
+        # Handle the response
         if response.status_code == 204:
             st.success("Expense updated successfully!")
         else:
