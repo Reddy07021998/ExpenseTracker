@@ -63,38 +63,22 @@ async def fetch_categories():
 # Function to fetch expenses with filters and pagination
 async def fetch_expenses(user_id, month_num=None, year=None, category_id=None, offset=0, limit=10):
     try:
-        # Define the base query
-        query = """
-            SELECT e.expense_id, e.expense_name, e.amount, e.expense_date, c.category_name
-            FROM expenses e
-            JOIN categories c ON e.category_id = c.category_id
-            WHERE e.user_id = $1
-        """
-        params = [user_id]
+        # Prepare parameters for the RPC call
+        params = {
+            "user_id_input": user_id,
+            "month_num_input": month_num,
+            "year_input": year,
+            "category_id_input": category_id,
+            "offset_input": offset,
+            "limit_input": limit
+        }
 
-        # Add dynamic filters using DATE_PART
-        if month_num is not None:
-            query += " AND DATE_PART('month', e.expense_date) = $2"
-            params.append(month_num)
+        # Call the RPC function
+        response = supabase.rpc("fetch_expenses", params).execute()
 
-        if year is not None:
-            query += f" AND DATE_PART('year', e.expense_date) = ${len(params) + 1}"
-            params.append(year)
-
-        if category_id is not None:
-            query += f" AND e.category_id = ${len(params) + 1}"
-            params.append(category_id)
-
-        # Add ordering and pagination
-        query += f" ORDER BY e.expense_date DESC OFFSET ${len(params) + 1} LIMIT ${len(params) + 2}"
-        params.extend([offset, limit])
-
-        # Execute the raw SQL query with Supabase's RPC mechanism
-        response = supabase.rpc("execute_sql", {"sql": query, "params": params}).execute()
-
-        # Convert results to a DataFrame
+        # Convert the result to a DataFrame
         if response.data:
-            df = pd.DataFrame(response.data, columns=['expense_id', 'expense_name', 'amount', 'expense_date', 'category_name'])
+            df = pd.DataFrame(response.data)
             df.columns = ['Expense ID', 'Expense Name', 'Amount', 'Expense Date', 'Category']
             return df
         else:
