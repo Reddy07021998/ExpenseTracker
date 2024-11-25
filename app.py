@@ -85,12 +85,20 @@ async def fetch_expenses(user_id, month_num=None, year=None, category_id=None, o
 
         # Convert response to a DataFrame
         if response.data:
-            # Convert all integer columns to native Python int before passing to pandas
             cleaned_data = []
+
+            # Ensure all int64 are converted to Python native int (serializable by JSON)
             for row in response.data:
-                cleaned_row = {key: (int(value) if isinstance(value, np.int64) else value) for key, value in row.items()}
+                cleaned_row = {}
+                for key, value in row.items():
+                    # If the value is of type np.int64, convert it to a regular int
+                    if isinstance(value, np.int64):
+                        cleaned_row[key] = int(value)
+                    else:
+                        cleaned_row[key] = value
                 cleaned_data.append(cleaned_row)
 
+            # Convert cleaned data to DataFrame
             df = pd.DataFrame(cleaned_data)
 
             # Debug: Check DataFrame types before conversion
