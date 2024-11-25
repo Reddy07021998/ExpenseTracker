@@ -49,7 +49,6 @@ async def register_user(username, email, password):
 def run_async(coro):
     return asyncio.run(coro)
 
-# Function to add a new expense
 async def add_expense(user_id, expense_name, amount, expense_date, category_id):
     try:
         # Convert all inputs to native Python types
@@ -58,6 +57,7 @@ async def add_expense(user_id, expense_name, amount, expense_date, category_id):
         amount = float(amount)  # In case it's a numpy float64
         expense_date = str(expense_date)  # Ensure it's a string in ISO format
 
+        # Insert data into the Supabase 'expenses' table
         response = supabase.table('expenses').insert({
             'user_id': user_id,
             'expense_name': expense_name,
@@ -66,15 +66,20 @@ async def add_expense(user_id, expense_name, amount, expense_date, category_id):
             'category_id': category_id
         }).execute()
 
-        if response.status_code == 201:
-            return True
-        else:
-            st.error(f"Failed to add expense. Response: {response}")
+        # Check for errors in the response
+        if response.error:
+            st.error(f"Failed to add expense: {response.error.message}")
             return False
+
+        # Successfully added the expense
+        st.success("Expense added successfully!")
+        return True
+
     except Exception as e:
         logging.error(f"Error adding expense: {e}")
         st.error(f"Error adding expense: {e}")
         return False
+
 
 # Function to fetch categories
 async def fetch_categories():
