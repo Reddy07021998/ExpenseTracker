@@ -61,29 +61,50 @@ async def fetch_categories():
         return pd.DataFrame(columns=['category_id', 'category_name'])
 
 # Function to fetch expenses with filters and pagination
+import pandas as pd
+import streamlit as st
+
 async def fetch_expenses(user_id, month_num=None, year=None, category_id=None, offset=0, limit=10):
     try:
-        query = supabase.table('expenses').select('*').eq('user_id', user_id)
-        
+        # Base query
+        query = supabase.table("expenses").select(
+            """
+            expense_id, 
+            expense_name, 
+            amount, 
+            expense_date, 
+            categories(category_name)
+            """
+        ).eq("user_id", user_id)
+
+        # Add filters dynamically
         if month_num is not None:
-            query = query.eq('EXTRACT(MONTH FROM expense_date)', month_num)
-        
+            query = query.filter("EXTRACT(MONTH FROM expense_date)", "eq", month_num)
+
         if year is not None:
-            query = query.eq('EXTRACT(YEAR FROM expense_date)', year)
+            query = query.filter("EXTRACT(YEAR FROM expense_date)", "eq", year)
 
         if category_id is not None:
-            query = query.eq('category_id', category_id)
+            query = query.eq("category_id", category_id)
 
-        response = query.range(offset, offset + limit - 1).execute()
-        
+        # Add ordering and pagination
+        query = query.order("expense_date", desc=True).range(offset, offset + limit - 1)
+
+        # Execute the query
+        response = query.execute()
+
+        # Check for data
         if response.data:
+            # Convert the response to a DataFrame
             df = pd.DataFrame(response.data)
+            df.columns = ['Expense ID', 'Expense Name', 'Amount', 'Expense Date', 'Category']
             return df
         else:
-            return pd.DataFrame(columns=['expense_id', 'expense_name', 'amount', 'expense_date', 'category_name'])
+            return pd.DataFrame(columns=['Expense ID', 'Expense Name', 'Amount', 'Expense Date', 'Category'])
+
     except Exception as e:
         st.error(f"Error fetching expenses: {e}")
-        return pd.DataFrame(columns=['expense_id', 'expense_name', 'amount', 'expense_date', 'category_name'])
+        return pd.DataFrame(columns=['Expense ID', 'Expense Name', 'Amount', 'Expense Date', 'Category'])
 
 # Function to delete an expense
 async def delete_expense(expense_id):
