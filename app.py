@@ -62,7 +62,7 @@ async def fetch_categories():
 
 # Function to fetch expenses with filters and pagination
 import pandas as pd
-import numpy as np  # Import numpy to handle int64
+import numpy as np  # Required for handling types
 import streamlit as st
 
 async def fetch_expenses(user_id, month_num=None, year=None, category_id=None, offset=0, limit=10):
@@ -80,27 +80,27 @@ async def fetch_expenses(user_id, month_num=None, year=None, category_id=None, o
         # Call the RPC function or table query
         response = supabase.rpc("fetch_expenses", params).execute()
 
-        # Debug: Print response data to inspect
-        st.write("Response data:", response.data)
+        # Debug: Print raw response data to inspect
+        st.write("Raw response data:", response.data)
 
         # Convert response to a DataFrame
         if response.data:
-            df = pd.DataFrame(response.data)
-            
+            # Convert all integer columns to native Python int before passing to pandas
+            cleaned_data = []
+            for row in response.data:
+                cleaned_row = {key: (int(value) if isinstance(value, np.int64) else value) for key, value in row.items()}
+                cleaned_data.append(cleaned_row)
+
+            df = pd.DataFrame(cleaned_data)
+
             # Debug: Check DataFrame types before conversion
             st.write("DataFrame types before conversion:", df.dtypes)
 
-            # Convert all columns of type int64 to native Python int
-            for column in df.columns:
-                if pd.api.types.is_integer_dtype(df[column]):
-                    st.write(f"Converting column: {column}")
-                    df[column] = df[column].apply(lambda x: int(x) if pd.notna(x) else x)
-
-            # Debug: Check DataFrame types after conversion
-            st.write("DataFrame types after conversion:", df.dtypes)
-
-            # Ensure column names match the expected output
+            # Rename columns
             df.columns = ['Expense ID', 'Expense Name', 'Amount', 'Expense Date', 'Category']
+
+            # Debug: Check DataFrame after renaming columns
+            st.write("DataFrame after column rename:", df)
 
             return df
         else:
