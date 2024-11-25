@@ -61,42 +61,40 @@ async def fetch_categories():
         return pd.DataFrame(columns=['category_id', 'category_name'])
 
 # Function to fetch expenses with filters and pagination
-import pandas as pd
-import streamlit as st
-
 async def fetch_expenses(user_id, month_num=None, year=None, category_id=None, offset=0, limit=10):
     try:
-        # Base query
-        query = supabase.table("expenses").select(
-            """
-            expense_id, 
-            expense_name, 
-            amount, 
-            expense_date, 
-            categories(category_name)
-            """
-        ).eq("user_id", user_id)
+        # Define the base query
+        query = """
+            SELECT e.expense_id, e.expense_name, e.amount, e.expense_date, c.category_name
+            FROM expenses e
+            JOIN categories c ON e.category_id = c.category_id
+            WHERE e.user_id = $1
+        """
+        params = [user_id]
 
-        # Add filters dynamically
+        # Add dynamic filters using DATE_PART
         if month_num is not None:
-            query = query.filter("EXTRACT(MONTH FROM expense_date)", "eq", month_num)
+            query += " AND DATE_PART('month', e.expense_date) = $2"
+            params.append(month_num)
 
         if year is not None:
-            query = query.filter("EXTRACT(YEAR FROM expense_date)", "eq", year)
+            query += f" AND DATE_PART('year', e.expense_date) = ${len(params) + 1}"
+            params.append(year)
 
         if category_id is not None:
-            query = query.eq("category_id", category_id)
+            query += f" AND e.category_id = ${len(params) + 1}"
+            params.append(category_id)
 
         # Add ordering and pagination
-        query = query.order("expense_date", desc=True).range(offset, offset + limit - 1)
+        query += f" ORDER BY e.expense_date DESC OFFSET ${len(params) + 1} LIMIT ${len(params) + 2}"
+        params.extend([offset, limit])
 
-        # Execute the query
-        response = query.execute()
+        # Execute the raw SQL query with Supabase's RPC mechanism
+        response = supabase.rpc("execute_sql", {"sql": query, "params": params}).execute()
 
-        # Check for data
+        # Convert results to a DataFrame
         if response.data:
-            # Convert the response to a DataFrame
-            df = pd.DataFrame(response.data)
+            df = pd.DataFrame(response.data, columns=['expense_id', 'expense_name', 'amount', 'expense_date', 'category_name'])
             df.columns = ['Expense ID', 'Expense Name', 'Amount', 'Expense Date', 'Category']
             return df
         else:
