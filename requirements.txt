@@ -1,0 +1,6 @@
+bcrypt
+streamlit
+pandas
+seaborn
+matplotlib
+asyncpg
