@@ -9,7 +9,7 @@ import asyncio
 
 # Initialize Supabase client
 supabaseUrl = 'https://gippopxafisxpvrkkplt.supabase.co'
-supabaseKey = 'process.env.SUPABASE_KEY' # Ensure your environment variable is set
+supabaseKey = process.env.SUPABASE_KEY # Ensure your environment variable is set
 supabase: Client = create_client(supabaseUrl, supabaseKey)
 
 # Function to authenticate a user
