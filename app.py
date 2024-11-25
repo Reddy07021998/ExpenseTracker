@@ -313,10 +313,11 @@ elif st.session_state.current_screen == "main_menu":
             st.dataframe(expenses_df) 
         else: 
             st.write("No expenses found based on the selected filters.")
-            
-     with col7:
-       if st.button("🔄 Refresh"):
-                st.rerun()  # This will refresh the app by rerunning the entire script
+
+    with col6:
+        # Display the expenses DataFrame with expense ID included and no index column 
+        if st.button("🔄 Refresh"):
+                    st.rerun()
 
     # Pagination: Back and Next buttons 
     col1, col2 = st.columns([1, 1]) 
