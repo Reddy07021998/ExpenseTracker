@@ -65,14 +65,26 @@ import pandas as pd
 import streamlit as st
 
 # Function to fetch expenses with filters and pagination
+import pandas as pd
+import streamlit as st
+
+# Function to fetch expenses with filters and pagination
 async def fetch_expenses(user_id, month_num=None, year=None, category_id=None, offset=0, limit=10):
     try:
+        # Convert int64 to regular int before passing to the RPC function
+        user_id = int(user_id)
+        category_id = int(category_id) if category_id is not None else None
+        month_num = int(month_num) if month_num is not None else None
+        year = int(year) if year is not None else None
+        offset = int(offset)
+        limit = int(limit)
+
         # Prepare parameters for the RPC call
         params = {
-            "user_id_input": user_id,  # user_id is an integer from the `users` table
+            "user_id_input": user_id,
             "month_num_input": month_num,
             "year_input": year,
-            "category_id_input": category_id,  # category_id should match the database type (integer)
+            "category_id_input": category_id,
             "offset_input": offset,
             "limit_input": limit
         }
