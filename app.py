@@ -67,19 +67,27 @@ async def add_expense(user_id, expense_name, amount, expense_date, category_id):
             'category_id': category_id
         }).execute()
 
-        # Check the response
-        if response.status_code != 200:  # 200 is the success code
-            st.error(f"Failed to add expense: {response.json()}")
+        # Debugging: print or log the response
+        logging.debug(f"Response from Supabase: {response}")
+
+        # Check if 'data' or 'error' attributes exist
+        if response and hasattr(response, 'data') and response.data:
+            st.success("Expense added successfully!")
+            return True
+
+        if response and hasattr(response, 'error') and response.error:
+            st.error(f"Failed to add expense: {response.error}")
             return False
 
-        st.success("Expense added successfully!")
-        return True
+        st.error("Failed to add expense: Unknown error occurred.")
+        return False
 
     except Exception as e:
         # Log and show the exception
         logging.error(f"Error adding expense: {e}")
         st.error(f"Error adding expense: {e}")
         return False
+
 
 # Function to fetch categories
 async def fetch_categories():
