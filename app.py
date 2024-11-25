@@ -63,6 +63,22 @@ async def fetch_categories():
 # Function to fetch expenses with filters and pagination
 async def fetch_expenses(user_id, month_num=None, year=None, category_id=None, offset=0, limit=10):
     try:
+        # Validate and ensure UUID format for user_id and category_id
+        from uuid import UUID
+
+        try:
+            user_id = str(UUID(user_id))  # Ensure user_id is a valid UUID
+        except ValueError:
+            st.error("Invalid user ID. Please provide a valid UUID.")
+            return pd.DataFrame(columns=['Expense ID', 'Expense Name', 'Amount', 'Expense Date', 'Category'])
+
+        if category_id:
+            try:
+                category_id = str(UUID(category_id))  # Ensure category_id is a valid UUID
+            except ValueError:
+                st.error("Invalid category ID. Please provide a valid UUID.")
+                return pd.DataFrame(columns=['Expense ID', 'Expense Name', 'Amount', 'Expense Date', 'Category'])
+
         # Prepare parameters for the RPC call
         params = {
             "user_id_input": user_id,
@@ -72,6 +88,9 @@ async def fetch_expenses(user_id, month_num=None, year=None, category_id=None, o
             "offset_input": offset,
             "limit_input": limit
         }
+
+        # Log parameters for debugging
+        st.write(f"Parameters: {params}")
 
         # Call the RPC function
         response = supabase.rpc("fetch_expenses", params).execute()
