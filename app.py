@@ -303,17 +303,20 @@ elif st.session_state.current_screen == "main_menu":
         if st.button("Show Heatmap"):
             st.session_state.current_screen = "heatmap_view"
             st.rerun()
-    # Add the refresh button in the second (right) column
-    with col5:
-        if st.button("🔄 Refresh"):
-            st.rerun()  # This will refresh the app by rerunning the entire script
 
-    # Display the expenses DataFrame with expense ID included and no index column 
-    if not expenses_df.empty: 
-        st.write("### Expense Details") 
-        st.dataframe(expenses_df) 
-    else: 
-        st.write("No expenses found based on the selected filters.")
+    col6, col7 = st.columns([1, 1]) 
+
+    with col6:
+        # Display the expenses DataFrame with expense ID included and no index column 
+        if not expenses_df.empty: 
+            st.write("### Expense Details") 
+            st.dataframe(expenses_df) 
+        else: 
+            st.write("No expenses found based on the selected filters.")
+            
+     with col7:
+       if st.button("🔄 Refresh"):
+                st.rerun()  # This will refresh the app by rerunning the entire script
 
     # Pagination: Back and Next buttons 
     col1, col2 = st.columns([1, 1]) 
@@ -361,9 +364,6 @@ elif st.session_state.current_screen == "heatmap_view":
     if st.button("⬅️"):
         st.session_state.current_screen = "main_menu"
         st.rerun()
-    
-    if st.button("🔄"):
-        st.rerun()  # This will refresh the app by rerunning the entire script
 
 # Add Expense Screen
 elif st.session_state.current_screen == "add_expense":
@@ -488,7 +488,7 @@ elif st.session_state.current_screen == "confirm_delete":
             expense_details = expenses_df[expenses_df['Expense ID'] == selected_expense_id].iloc[0]
 
             # Display details for confirmation
-            st.write("### Expense Details")
+            st.write("### Expense Details") 
             st.write(f"**Name:** {expense_details['Expense Name']}")
             st.write(f"**Amount:** {expense_details['Amount']}")
             st.write(f"**Date:** {expense_details['Expense Date']}")
