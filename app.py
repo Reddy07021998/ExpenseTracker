@@ -61,10 +61,6 @@ async def fetch_categories():
         return pd.DataFrame(columns=['category_id', 'category_name'])
 
 # Function to fetch expenses with filters and pagination
-import pandas as pd
-import numpy as np  # Required for handling types
-import streamlit as st
-
 async def fetch_expenses(user_id, month_num=None, year=None, category_id=None, offset=0, limit=10):
   try:
     # Handle category_id to ensure it is an integer (in case it's passed as np.int64)
@@ -124,6 +120,17 @@ async def update_expense(expense_id, user_id, expense_name, amount, expense_date
             st.success("Expense updated successfully!")
     except Exception as e:
         st.error(f"Error updating expense: {e}")
+
+# Function to delete an expense
+async def delete_expense(expense_id):
+    try:
+        response = supabase.table('expenses').delete().eq('expense_id', expense_id).execute()
+        if response.status_code == 204:
+            st.success("Expense deleted successfully!")
+        else:
+            st.error("Error deleting expense.")
+    except Exception as e:
+        st.error(f"Error deleting expense: {e}")
 
 # Helper function to run async code within the synchronous environment
 def run_async(coroutine_func):
@@ -392,7 +399,6 @@ elif st.session_state.current_screen == "confirm_delete":
             # Confirm deletion
             if st.button("Confirm Delete"):
                 run_async(delete_expense(selected_expense_id))
-                st.success("Expense deleted successfully!")
                 st.session_state.current_screen = "main_menu"
                 st.rerun()
 
