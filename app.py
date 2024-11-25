@@ -348,7 +348,7 @@ elif st.session_state.current_screen == "edit_expense":
             if st.button("Cancel"):
                 st.session_state.current_screen = "main_menu"
                 st.rerun()
-				
+
 # Delete Expense Screen
 elif st.session_state.current_screen == "confirm_delete":
     st.title("Delete Expense")
