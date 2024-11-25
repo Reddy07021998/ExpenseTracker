@@ -61,10 +61,8 @@ async def fetch_categories():
         return pd.DataFrame(columns=['category_id', 'category_name'])
 
 # Function to fetch expenses with filters and pagination
-import uuid
-
-# Function to fetch expenses with filters and pagination
 import pandas as pd
+import streamlit as st
 
 async def fetch_expenses(user_id, month_num=None, year=None, category_id=None, offset=0, limit=10):
     try:
@@ -85,8 +83,8 @@ async def fetch_expenses(user_id, month_num=None, year=None, category_id=None, o
         if response.data:
             df = pd.DataFrame(response.data)
 
-            # Convert all int64 columns to int (Python native int type)
-            df = df.applymap(lambda x: int(x) if isinstance(x, pd.Int64Dtype) else x)
+            # Convert int64 columns to native int
+            df = df.applymap(lambda x: int(x) if isinstance(x, (pd.NA, int)) or isinstance(x, pd.Int64Dtype) else x)
 
             # Ensure column names match the expected output
             df.columns = ['Expense ID', 'Expense Name', 'Amount', 'Expense Date', 'Category']
@@ -98,7 +96,6 @@ async def fetch_expenses(user_id, month_num=None, year=None, category_id=None, o
     except Exception as e:
         st.error(f"Error fetching expenses: {e}")
         return pd.DataFrame(columns=['Expense ID', 'Expense Name', 'Amount', 'Expense Date', 'Category'])
-
 
 # Function to update an expense based on expense_id and user_id
 async def update_expense(expense_id, user_id, expense_name, amount, expense_date, category_id):
