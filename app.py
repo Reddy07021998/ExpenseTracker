@@ -7,11 +7,20 @@ import matplotlib.pyplot as plt
 from supabase import create_client, Client
 import asyncio
 import numpy as np
+import logging
+
 
 # Initialize Supabase client
 supabaseUrl = 'https://gippopxafisxpvrkkplt.supabase.co'
 supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpcHBvcHhhZmlzeHB2cmtrcGx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI1MjM1MTcsImV4cCI6MjA0ODA5OTUxN30.ldQh7QxpG08pERpOKl_-3gGr8CTYdPKGx83dDYJe5ZM"  # Ensure your environment variable is set
 supabase: Client = create_client(supabaseUrl, supabaseKey)
+
+# Configure logging
+logging.basicConfig(
+    filename="expense_app.log", 
+    level=logging.ERROR, 
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
 
 # Function to authenticate a user
 async def authenticate_user(username, password):
@@ -129,9 +138,13 @@ async def delete_expense(expense_id):
         if response.status_code == 204:
             st.success("Expense deleted successfully!")
         else:
-            st.error("Error deleting expense.")
+            error_message = f"Error deleting expense. Status code: {response.status_code}, Response: {response}"
+            st.error(error_message)
+            logging.error(error_message)
     except Exception as e:
-        st.error(f"Error deleting expense: {e}")
+        error_message = f"Exception during deletion of expense ID {expense_id}: {e}"
+        st.error(error_message)
+        logging.error(error_message)
 
 # Helper function to run async code within the synchronous environment
 def run_async(coroutine_func):
@@ -375,7 +388,12 @@ elif st.session_state.current_screen == "confirm_delete":
     st.title("Delete Expense")
 
     # Fetch expenses to populate a dropdown of expense IDs
-    expenses_df = run_async(fetch_expenses(st.session_state.user_id))
+    try:
+        expenses_df = run_async(fetch_expenses(st.session_state.user_id))
+    except Exception as e:
+        st.error(f"Error fetching expenses: {e}")
+        logging.error(f"Error fetching expenses: {e}")
+        st.stop()  # Prevent further execution if fetch fails
 
     if expenses_df.empty:
         st.warning("No expenses available to delete.")
@@ -399,7 +417,11 @@ elif st.session_state.current_screen == "confirm_delete":
 
             # Confirm deletion
             if st.button("Confirm Delete"):
-                run_async(delete_expense(selected_expense_id))
+                try:
+                    run_async(delete_expense(selected_expense_id))
+                except Exception as e:
+                    st.error(f"Error during delete operation: {e}")
+                    logging.error(f"Error during delete operation: {e}")
                 st.session_state.current_screen = "main_menu"
                 st.rerun()
 
