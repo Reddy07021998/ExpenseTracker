@@ -304,6 +304,9 @@ elif st.session_state.current_screen == "main_menu":
             st.session_state.current_screen = "heatmap_view"
             st.rerun()        
 
+    if st.button("🔄"):
+            st.rerun() 
+
     # Display the expenses DataFrame with expense ID included and no index column 
     if not expenses_df.empty: 
         st.write("### Expense Details") 
@@ -324,9 +327,6 @@ elif st.session_state.current_screen == "main_menu":
         if (st.button("Next →")): 
             # Go to next page 
             st.session_state.page_offset += (st.session_state.page_limit)
-            
-    if st.button("🔄 Refresh"):
-            st.rerun() 
 
     if st.button("Logout"): 
         st.session_state.user_id = None  
