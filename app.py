@@ -37,40 +37,39 @@ async def authenticate_user(username, password):
 def hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
-# Function to register a new user using Supabase Authentication
 def register_user(username, email, password):
     try:
         # Check if user already exists by email
-        existing_user = supabase.auth.admin.list_users(email=email)
-        if existing_user:
+        existing_user_response = supabase.auth.api.get_user_by_email(email)
+        if existing_user_response.data:
             st.error("Email already registered. Please use a different email.")
             return
 
         # Register the user in Supabase Auth
-        user = supabase.auth.sign_up({
+        user_response = supabase.auth.sign_up({
             "email": email,
             "password": password,
         })
 
-        if user:
-            # You can store additional user data (like username) in Supabase database or other tables if needed.
-            # Save username in the database for your app
+        # Check if user registration is successful
+        if 'user' in user_response.data:
+            user_id = user_response.data['user']['id']  # User ID
             user_data = {
                 "username": username,
                 "email": email,
-                "user_id": user['user']['id'],  # Store user_id for future reference
+                "user_id": user_id,  # Store user_id for future reference
             }
-            
+
             # Insert the user into your database table (e.g., users)
             response = supabase.table("users").insert(user_data).execute()
+            
             if response.status_code == 201:
                 st.success("User registered successfully! You can now log in.")
             else:
                 st.error(f"Failed to insert user data into database: {response.error}")
-
         else:
             st.error("Registration failed. Please try again.")
-    
+
     except Exception as e:
         st.error(f"Error registering user: {str(e)}")
         logging.error(f"Error registering user: {str(e)}")
