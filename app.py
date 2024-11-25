@@ -61,27 +61,18 @@ async def fetch_categories():
         return pd.DataFrame(columns=['category_id', 'category_name'])
 
 # Function to fetch expenses with filters and pagination
-import pandas as pd
-import streamlit as st
+import uuid
 
-# Function to fetch expenses with filters and pagination
-import pandas as pd
-import streamlit as st
-
-# Function to fetch expenses with filters and pagination
 async def fetch_expenses(user_id, month_num=None, year=None, category_id=None, offset=0, limit=10):
     try:
-        # Convert int64 to regular int before passing to the RPC function
-        user_id = int(user_id)
-        category_id = int(category_id) if category_id is not None else None
-        month_num = int(month_num) if month_num is not None else None
-        year = int(year) if year is not None else None
-        offset = int(offset)
-        limit = int(limit)
+        # Ensure user_id and category_id are UUID objects
+        user_id = uuid.UUID(user_id)  # Convert to UUID
+        if category_id:
+            category_id = uuid.UUID(category_id)  # Convert to UUID if category_id is provided
 
         # Prepare parameters for the RPC call
         params = {
-            "user_id_input": user_id,
+            "user_id_input": user_id,  # user_id is now a UUID
             "month_num_input": month_num,
             "year_input": year,
             "category_id_input": category_id,
@@ -104,14 +95,6 @@ async def fetch_expenses(user_id, month_num=None, year=None, category_id=None, o
         st.error(f"Error fetching expenses: {e}")
         return pd.DataFrame(columns=['Expense ID', 'Expense Name', 'Amount', 'Expense Date', 'Category'])
 
-# Function to delete an expense
-async def delete_expense(expense_id):
-    try:
-        response = supabase.table('expenses').delete().eq('expense_id', expense_id).execute()
-        if response.status_code == 204:
-            st.success("Expense deleted successfully!")
-    except Exception as e:
-        st.error(f"Error deleting expense: {e}")
 
 # Function to update an expense based on expense_id and user_id
 async def update_expense(expense_id, user_id, expense_name, amount, expense_date, category_id):
