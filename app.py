@@ -38,22 +38,39 @@ def hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
 # Function to register a new user
-async def register_user(username: str, email: str, password: str):
+# Function to register a new user using Supabase Authentication
+def register_user(username, email, password):
     try:
-        password_hash = hash_password(password)
-        data = {
-            "username": username,
-            "email": email,
-            "password_hash": password_hash,
-        }
-        response = supabase.table("users").insert(data).execute()
+        # Check if user already exists by email
+        existing_user = supabase.auth.admin.list_users(email=email)
+        if existing_user:
+            st.error("Email already registered. Please use a different email.")
+            return
 
-        if response.status_code == 200:
-            st.success("Registration successful! You can now log in.")
+        # Register the user in Supabase Auth
+        user = supabase.auth.sign_up({
+            "email": email,
+            "password": password,
+        })
+
+        if user:
+            # You can store additional user data (like username) in Supabase database or other tables if needed.
+            # Save username in the database for your app
+            user_data = {
+                "username": username,
+                "email": email,
+                "user_id": user['user']['id'],  # Store user_id for future reference
+            }
+            
+            # Insert the user into your database table (e.g., users)
+            supabase.table("users").insert(user_data).execute()
+
+            st.success("User registered successfully! You can now log in.")
         else:
-            st.error(f"Error during registration: {response.json().get('message', 'Unknown error')}")
+            st.error("Registration failed. Please try again.")
+    
     except Exception as e:
-        st.error(f"An unexpected error occurred: {str(e)}")
+        st.error(f"Error registering user: {str(e)}")
 
 # Wrapper to handle async calls in Streamlit
 def run_async(coro):
