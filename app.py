@@ -170,6 +170,7 @@ async def update_expense(expense_id, user_id, expense_name, amount, expense_date
         logging.error(f"Error updating expense: {e}")
 
 
+
 # Function to delete an expense
 async def delete_expense(expense_id):
     try:
