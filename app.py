@@ -63,16 +63,19 @@ async def fetch_categories():
 # Function to fetch expenses with filters and pagination
 import uuid
 
+# Function to fetch expenses with filters and pagination
 async def fetch_expenses(user_id, month_num=None, year=None, category_id=None, offset=0, limit=10):
     try:
-        # Ensure user_id and category_id are UUID objects
-        user_id = uuid.UUID(user_id)  # Convert to UUID
-        if category_id:
-            category_id = uuid.UUID(category_id)  # Convert to UUID if category_id is provided
+        # Ensure user_id and category_id are integers (UUIDs are not required here)
+        # If they are UUIDs passed as strings, convert them to integers
+        if isinstance(user_id, str):
+            user_id = int(user_id)  # Convert to integer if user_id is a string
+        if category_id and isinstance(category_id, str):
+            category_id = int(category_id)  # Convert to integer if category_id is a string
 
         # Prepare parameters for the RPC call
         params = {
-            "user_id_input": user_id,  # user_id is now a UUID
+            "user_id_input": user_id,  # user_id is an integer from the `users` table
             "month_num_input": month_num,
             "year_input": year,
             "category_id_input": category_id,
