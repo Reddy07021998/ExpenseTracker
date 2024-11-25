@@ -1,4 +1,3 @@
-
 import os
 import bcrypt
 import streamlit as st
@@ -10,6 +9,13 @@ import asyncio
 import numpy as np
 import logging
 
+# Create two columns, one for left content and one for right content (for the refresh button)
+col1, col2 = st.columns([1, 10])  # Adjust the ratios to fit your design
+
+# Add the refresh button in the second (right) column
+with col2:
+    if st.button("🔄 Refresh"):
+        st.experimental_rerun()  # This will refresh the app by rerunning the entire script
 
 # Initialize Supabase client
 supabaseUrl = 'https://gippopxafisxpvrkkplt.supabase.co'
