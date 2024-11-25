@@ -61,14 +61,6 @@ async def fetch_categories():
         st.error(f"Error fetching categories: {e}")
         return pd.DataFrame(columns=['category_id', 'category_name'])
 
-async def delete_expense(expense_id):
-    try:
-        response = supabase.table('expenses').delete().eq('expense_id', expense_id).execute()
-        if response.status_code == 204:
-            st.success("Expense deleted successfully!")
-    except Exception as e:
-        st.error(f"Error deleting expense: {e}")
-
 # Function to fetch expenses with filters and pagination
 async def fetch_expenses(user_id, month_num=None, year=None, category_id=None, offset=0, limit=10):
   try:
@@ -302,6 +294,9 @@ elif st.session_state.current_screen == "heatmap_view":
     if st.button("⬅️"):
         st.session_state.current_screen = "main_menu"
         st.rerun()
+import pandas as pd
+import numpy as np  # Required for handling types
+import streamlit as st
 
 # Add Expense Screen
 elif st.session_state.current_screen == "add_expense":
@@ -328,79 +323,48 @@ elif st.session_state.current_screen == "add_expense":
         st.session_state.current_screen = "main_menu"
         st.rerun()
 
-import pandas as pd
-import streamlit as st
+# Edit Expense Screen
+elif st.session_state.current_screen == "edit_expense":
+    st.title("Edit Expense")
 
-# Make sure that the initial conditional structure is correct (e.g., if-else block).
-if "current_screen" in st.session_state:
-    if st.session_state.current_screen == "add_expense":
-        st.title("Add Expense")
+    # Fetch expenses to populate a dropdown of expense IDs
+    expenses_df = run_async(fetch_expenses(st.session_state.user_id))
 
-        expense_name = st.text_input("Expense Name")
-        amount = st.number_input("Amount", min_value=0.01 , step=0.01)
-        expense_date = st.date_input("Expense Date")
-
-        categories_df = run_async(fetch_categories())  # Fetch categories
-
-        category_names = categories_df['category_name'].tolist()
-        category = st.selectbox("Category", category_names)
-
-        if st.button("Save Expense"):
-            # Ensure category_id is retrieved correctly
-            category_id = categories_df[categories_df['category_name'] == category]['category_id'].values[0]
-            # Adding the expense using the API call
-            run_async(add_expense(st.session_state.user_id, expense_name, amount, expense_date, category_id))
+    if expenses_df.empty:
+        st.warning("No expenses available to edit.")
+        if st.button("Back to Main Menu"):
             st.session_state.current_screen = "main_menu"
             st.rerun()
+    else:
+        expense_ids = expenses_df['Expense ID'].tolist()
+        selected_expense_id = st.selectbox("Select Expense ID to Edit", ["Select"] + expense_ids)
 
-        if st.button("Cancel"):
-            st.session_state.current_screen = "main_menu"
-            st.rerun()
+        if selected_expense_id != "Select":
+            # Fetch the details of the selected expense
+            expense_details = expenses_df[expenses_df['Expense ID'] == selected_expense_id].iloc[0]
 
-    # Edit Expense Screen
-    elif st.session_state.current_screen == "edit_expense":
-        st.title("Edit Expense")
+            # Display current details for editing
+            expense_name = st.text_input("Expense Name", expense_details['Expense Name'])
+            amount = st.number_input("Amount", min_value=0.0, step=0.01, value=float(expense_details['Amount']))
+            expense_date = st.date_input("Expense Date", pd.to_datetime(expense_details['Expense Date']))
+            
+            # Fetch categories for the select box
+            categories_df = run_async(fetch_categories())
+            category_names = categories_df['category_name'].tolist()
+            current_category = expense_details['Category']
+            category = st.selectbox("Category", category_names, index=category_names.index(current_category))
 
-        # Fetch expenses to populate a dropdown of expense IDs
-        expenses_df = run_async(fetch_expenses(st.session_state.user_id))
+            # Update the expense
+            if st.button("Save Changes"):
+                category_id = categories_df[categories_df['category_name'] == category]['category_id'].values[0]
+                run_async(update_expense(selected_expense_id, st.session_state.user_id, expense_name, amount, expense_date, category_id))
+                st.session_state.current_screen = "main_menu"
+                st.success("Expense updated successfully!")
+                st.rerun()
 
-        if expenses_df.empty:
-            st.warning("No expenses available to edit.")
-            if st.button("Back to Main Menu"):
+            if st.button("Cancel"):
                 st.session_state.current_screen = "main_menu"
                 st.rerun()
-        else:
-            expense_ids = expenses_df['Expense ID'].tolist()
-            selected_expense_id = st.selectbox("Select Expense ID to Edit", ["Select"] + expense_ids)
-
-            if selected_expense_id != "Select":
-                # Fetch the details of the selected expense
-                expense_details = expenses_df[expenses_df['Expense ID'] == selected_expense_id].iloc[0]
-
-                # Display current details for editing
-                expense_name = st.text_input("Expense Name", expense_details['Expense Name'])
-                amount = st.number_input("Amount", min_value=0.0, step=0.01, value=float(expense_details['Amount']))
-                expense_date = st.date_input("Expense Date", pd.to_datetime(expense_details['Expense Date']))
-                
-                # Fetch categories for the select box
-                categories_df = run_async(fetch_categories())
-                category_names = categories_df['category_name'].tolist()
-                current_category = expense_details['Category']
-                category = st.selectbox("Category", category_names, index=category_names.index(current_category))
-
-                # Update the expense
-                if st.button("Save Changes"):
-                    category_id = categories_df[categories_df['category_name'] == category]['category_id'].values[0]
-                    run_async(update_expense(selected_expense_id, st.session_state.user_id, expense_name, amount, expense_date, category_id))
-                    st.session_state.current_screen = "main_menu"
-                    st.success("Expense updated successfully!")
-                    st.rerun()
-
-                if st.button("Cancel"):
-                    st.session_state.current_screen = "main_menu"
-                    st.rerun()
-
-import asyncio
 
 # Delete Expense Screen
 elif st.session_state.current_screen == "confirm_delete":
@@ -431,12 +395,12 @@ elif st.session_state.current_screen == "confirm_delete":
 
             # Confirm deletion
             if st.button("Confirm Delete"):
-                # Run the async delete function correctly using asyncio
-                asyncio.run(delete_expense(selected_expense_id))
-                st.session_state.current_screen = "main_menu"
+                run_async(delete_expense(selected_expense_id))
                 st.success("Expense deleted successfully!")
+                st.session_state.current_screen = "main_menu"
                 st.rerun()
 
             if st.button("Cancel"):
                 st.session_state.current_screen = "main_menu"
                 st.rerun()
+				
