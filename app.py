@@ -37,13 +37,11 @@ async def authenticate_user(username, password):
 def hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
-# Function to register a new user
-# Function to register a new user using Supabase Authentication
 def register_user(username, email, password):
     try:
         # Check if user already exists by email
-        existing_user = supabase.auth.admin.list_users(email=email)
-        if existing_user:
+        existing_users = supabase.auth.api.list_users(query=email)
+        if existing_users:
             st.error("Email already registered. Please use a different email.")
             return
 
@@ -71,6 +69,7 @@ def register_user(username, email, password):
     
     except Exception as e:
         st.error(f"Error registering user: {str(e)}")
+
 
 # Wrapper to handle async calls in Streamlit
 def run_async(coro):
