@@ -61,6 +61,14 @@ async def fetch_categories():
         st.error(f"Error fetching categories: {e}")
         return pd.DataFrame(columns=['category_id', 'category_name'])
 
+async def delete_expense(expense_id):
+    try:
+        response = supabase.table('expenses').delete().eq('expense_id', expense_id).execute()
+        if response.status_code == 204:
+            st.success("Expense deleted successfully!")
+    except Exception as e:
+        st.error(f"Error deleting expense: {e}")
+
 # Function to fetch expenses with filters and pagination
 async def fetch_expenses(user_id, month_num=None, year=None, category_id=None, offset=0, limit=10):
   try:
@@ -392,40 +400,43 @@ if "current_screen" in st.session_state:
                     st.session_state.current_screen = "main_menu"
                     st.rerun()
 
-    # Delete Expense Screen
-    elif st.session_state.current_screen == "confirm_delete":
-        st.title("Delete Expense")
+import asyncio
 
-        # Fetch expenses to populate a dropdown of expense IDs
-        expenses_df = run_async(fetch_expenses(st.session_state.user_id))
+# Delete Expense Screen
+elif st.session_state.current_screen == "confirm_delete":
+    st.title("Delete Expense")
 
-        if expenses_df.empty:
-            st.warning("No expenses available to delete.")
-            if st.button("Back to Main Menu"):
+    # Fetch expenses to populate a dropdown of expense IDs
+    expenses_df = run_async(fetch_expenses(st.session_state.user_id))
+
+    if expenses_df.empty:
+        st.warning("No expenses available to delete.")
+        if st.button("Back to Main Menu"):
+            st.session_state.current_screen = "main_menu"
+            st.rerun()
+    else:
+        expense_ids = expenses_df['Expense ID'].tolist()
+        selected_expense_id = st.selectbox("Select Expense ID to Delete", ["Select"] + expense_ids)
+
+        if selected_expense_id != "Select":
+            # Fetch the details of the selected expense
+            expense_details = expenses_df[expenses_df['Expense ID'] == selected_expense_id].iloc[0]
+
+            # Display details for confirmation
+            st.write("### Expense Details")
+            st.write(f"**Name:** {expense_details['Expense Name']}")
+            st.write(f"**Amount:** {expense_details['Amount']}")
+            st.write(f"**Date:** {expense_details['Expense Date']}")
+            st.write(f"**Category:** {expense_details['Category']}")
+
+            # Confirm deletion
+            if st.button("Confirm Delete"):
+                # Run the async delete function correctly using asyncio
+                asyncio.run(delete_expense(selected_expense_id))
+                st.session_state.current_screen = "main_menu"
+                st.success("Expense deleted successfully!")
+                st.rerun()
+
+            if st.button("Cancel"):
                 st.session_state.current_screen = "main_menu"
                 st.rerun()
-        else:
-            expense_ids = expenses_df['Expense ID'].tolist()
-            selected_expense_id = st.selectbox("Select Expense ID to Delete", ["Select"] + expense_ids)
-
-            if selected_expense_id != "Select":
-                # Fetch the details of the selected expense
-                expense_details = expenses_df[expenses_df['Expense ID'] == selected_expense_id].iloc[0]
-
-                # Display details for confirmation
-                st.write("### Expense Details")
-                st.write(f"**Name:** {expense_details['Expense Name']}")
-                st.write(f"**Amount:** {expense_details['Amount']}")
-                st.write(f"**Date:** {expense_details['Expense Date']}")
-                st.write(f"**Category:** {expense_details['Category']}")
-
-                # Confirm deletion
-                if st.button("Confirm Delete"):
-                    run_async(delete_expense(selected_expense_id))
-                    st.success("Expense deleted successfully!")
-                    st.session_state.current_screen = "main_menu"
-                    st.rerun()
-
-                if st.button("Cancel"):
-                    st.session_state.current_screen = "main_menu"
-                    st.rerun()
