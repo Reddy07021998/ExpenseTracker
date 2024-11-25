@@ -21,6 +21,7 @@ logging.basicConfig(
     level=logging.ERROR, 
     format="%(asctime)s - %(levelname)s - %(message)s")
 
+
 # Function to authenticate a user
 async def authenticate_user(username, password):
     try:
@@ -70,6 +71,10 @@ async def add_expense(user_id, expense_name, amount, expense_date, category_id):
         if response.error:
             st.error(f"Failed to add expense: {response.error.message}")
             return False
+
+        logging.info(f"Response: {response.data}")
+        logging.error(f"Error: {response.error}")
+
 
         # Successfully added the expense
         st.success("Expense added successfully!")
