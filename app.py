@@ -19,7 +19,7 @@ supabase: Client = create_client(supabaseUrl, supabaseKey)
 logging.basicConfig(
     filename="expense_app.log", 
     level=logging.ERROR, 
-    format="%(asctime)s - %(levelname)s - %(message)s"
+    format="%(asctime)s - %(levelname)s - %(message)s")
 
 # Function to authenticate a user
 async def authenticate_user(username, password):
