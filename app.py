@@ -147,11 +147,14 @@ async def fetch_expenses(user_id, month_num=None, year=None, category_id=None, o
 # Function to update an expense based on expense_id and user_id
 async def update_expense(expense_id, user_id, expense_name, amount, expense_date, category_id):
     try:
-        # Convert int64 to regular int
-        expense_id = int(expense_id)
-        user_id = int(user_id)
-        category_id = int(category_id)
+        # Convert int64 to regular int for all fields that are integers
+        expense_id = int(expense_id)  # Ensure expense_id is a regular int
+        user_id = int(user_id)  # Ensure user_id is a regular int
+        category_id = int(category_id)  # Ensure category_id is a regular int
         amount = float(amount)  # Ensure amount is a float
+
+        # Convert date to string if necessary
+        expense_date = str(expense_date)  # Ensure the date is a string in ISO format
 
         # Update the expense
         response = supabase.table('expenses').update({
@@ -160,7 +163,7 @@ async def update_expense(expense_id, user_id, expense_name, amount, expense_date
             'expense_date': expense_date,
             'category_id': category_id
         }).eq('expense_id', expense_id).eq('user_id', user_id).execute()
-        
+
         if response.status_code == 204:
             st.success("Expense updated successfully!")
         else:
@@ -168,8 +171,6 @@ async def update_expense(expense_id, user_id, expense_name, amount, expense_date
     except Exception as e:
         st.error(f"Error updating expense: {e}")
         logging.error(f"Error updating expense: {e}")
-
-
 
 # Function to delete an expense
 async def delete_expense(expense_id):
