@@ -10,7 +10,7 @@ import numpy as np
 import logging
 
 # Create two columns, one for left content and one for right content (for the refresh button)
-col1, col2 = st.columns([1, 15])  # Adjust the ratios to fit your design
+col1, col2 = st.columns([0, 18])  # Adjust the ratios to fit your design
 
 # Add the refresh button in the second (right) column
 with col2:
