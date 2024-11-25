@@ -20,7 +20,6 @@ logging.basicConfig(
     filename="expense_app.log", 
     level=logging.ERROR, 
     format="%(asctime)s - %(levelname)s - %(message)s"
-)
 
 # Function to authenticate a user
 async def authenticate_user(username, password):
@@ -45,6 +44,10 @@ async def register_user(username, email, password):
             st.error("Registration failed.")
     except Exception as e:
         st.error(f"Error registering user: {str(e)}")
+
+# Wrapper to handle async calls in Streamlit
+def run_async(coro):
+    return asyncio.run(coro)
 
 # Function to add a new expense
 async def add_expense(user_id, expense_name, amount, expense_date, category_id):
@@ -418,7 +421,7 @@ elif st.session_state.current_screen == "confirm_delete":
             # Confirm deletion
             if st.button("Confirm Delete"):
                 try:
-                    run_async(delete_expense(selected_expense_id))
+                    run_async(delete_expense(selected_expense_id))  # Run the async function
                 except Exception as e:
                     st.error(f"Error during delete operation: {e}")
                     logging.error(f"Error during delete operation: {e}")
