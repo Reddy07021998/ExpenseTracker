@@ -456,7 +456,6 @@ elif st.session_state.current_screen == "edit_expense":
                 st.session_state.current_screen = "main_menu"
                 st.rerun()
 
-# Delete Expense Screen
 elif st.session_state.current_screen == "confirm_delete":
     st.title("Delete Expense")
 
@@ -474,27 +473,17 @@ elif st.session_state.current_screen == "confirm_delete":
             st.session_state.current_screen = "main_menu"
             st.rerun()
     else:
+        # Filter expenses to show only those present in the current view
         expense_ids = expenses_df['Expense ID'].tolist()
         selected_expense_id = st.selectbox("Select Expense ID to Delete", ["Select"] + expense_ids)
 
         if selected_expense_id != "Select":
-            # Fetch the details of the selected expense
             expense_details = expenses_df[expenses_df['Expense ID'] == selected_expense_id].iloc[0]
-
-            # Display details for confirmation
-            st.write("### Expense Details")
-            st.write(f"**Name:** {expense_details['Expense Name']}")
-            st.write(f"**Amount:** {expense_details['Amount']}")
-            st.write(f"**Date:** {expense_details['Expense Date']}")
-            st.write(f"**Category:** {expense_details['Category']}")
-
-            # Confirm deletion
-            if st.button("Confirm Delete"):
-                try:
-                    run_async(delete_expense(selected_expense_id))  # Run the async function
-                except Exception as e:
-                    st.error(f"Error during delete operation: {e}")
-                    logging.error(f"Error during delete operation: {e}")
+            st.write(f"Are you sure you want to delete the expense: {expense_details['Expense Name']} for {expense_details['Amount']}?")
+            
+            # Confirm Deletion
+            if st.button("Confirm Deletion"):
+                run_async(delete_expense(selected_expense_id))
                 st.session_state.current_screen = "main_menu"
                 st.rerun()
 
