@@ -32,18 +32,28 @@ async def authenticate_user(username, password):
     except Exception as e:
         st.error(f"Error authenticating user: {e}")
         return None
+        
+# encryption
+def hash_password(password: str) -> str:
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
 # Function to register a new user
-async def register_user(username, email, password):
+async def register_user(username: str, email: str, password: str):
     try:
-        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-        response = supabase.table('users').insert({'username': username, 'email': email, 'password_hash': hashed_password}).execute()
-        if response.status_code == 201:
-            st.success("User registered successfully! You can now log in.")
+        password_hash = hash_password(password)
+        data = {
+            "username": username,
+            "email": email,
+            "password_hash": password_hash,
+        }
+        response = supabase.table("users").insert(data).execute()
+
+        if response.status_code == 200:
+            st.success("Registration successful! You can now log in.")
         else:
-            st.error("Registration failed.")
+            st.error(f"Error during registration: {response.json().get('message', 'Unknown error')}")
     except Exception as e:
-        st.error(f"Error registering user: {str(e)}")
+        st.error(f"An unexpected error occurred: {str(e)}")
 
 # Wrapper to handle async calls in Streamlit
 def run_async(coro):
