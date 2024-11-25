@@ -67,6 +67,10 @@ import streamlit as st
 
 async def fetch_expenses(user_id, month_num=None, year=None, category_id=None, offset=0, limit=10):
     try:
+        # Handle category_id to ensure it is an integer (in case it's passed as np.int64)
+        if isinstance(category_id, np.int64):
+            category_id = int(category_id)
+        
         # Prepare parameters for the RPC call
         params = {
             "user_id_input": user_id,  # user_id is an integer from the `users` table
