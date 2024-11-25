@@ -80,14 +80,24 @@ async def fetch_expenses(user_id, month_num=None, year=None, category_id=None, o
         # Call the RPC function or table query
         response = supabase.rpc("fetch_expenses", params).execute()
 
+        # Debug: Print response data to inspect
+        st.write("Response data:", response.data)
+
         # Convert response to a DataFrame
         if response.data:
             df = pd.DataFrame(response.data)
+            
+            # Debug: Check DataFrame types before conversion
+            st.write("DataFrame types before conversion:", df.dtypes)
 
             # Convert all columns of type int64 to native Python int
             for column in df.columns:
                 if pd.api.types.is_integer_dtype(df[column]):
-                    df[column] = df[column].apply(lambda x: int(x))
+                    st.write(f"Converting column: {column}")
+                    df[column] = df[column].apply(lambda x: int(x) if pd.notna(x) else x)
+
+            # Debug: Check DataFrame types after conversion
+            st.write("DataFrame types after conversion:", df.dtypes)
 
             # Ensure column names match the expected output
             df.columns = ['Expense ID', 'Expense Name', 'Amount', 'Expense Date', 'Category']
