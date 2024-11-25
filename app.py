@@ -6,10 +6,14 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from supabase import create_client, Client
 import asyncio
+from dotenv import load_dotenv
+
+load_dotenv()  # This will load environment variables from a .env file
+
 
 # Initialize Supabase client
 supabaseUrl = 'https://gippopxafisxpvrkkplt.supabase.co'
-supabaseKey = process.env.SUPABASE_KEY # Ensure your environment variable is set
+supabaseKey = supabaseKey = os.getenv("SUPABASE_KEY")  # Ensure your environment variable is set
 supabase: Client = create_client(supabaseUrl, supabaseKey)
 
 # Function to authenticate a user
