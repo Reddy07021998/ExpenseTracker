@@ -9,14 +9,6 @@ import asyncio
 import numpy as np
 import logging
 
-# Create two columns, one for left content and one for right content (for the refresh button)
-col1, col2 = st.columns([1, 18])  # Adjust the ratios to fit your design
-
-# Add the refresh button in the second (right) column
-with col2:
-    if st.button("🔄 Refresh"):
-        st.rerun()  # This will refresh the app by rerunning the entire script
-
 # Initialize Supabase client
 supabaseUrl = 'https://gippopxafisxpvrkkplt.supabase.co'
 supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpcHBvcHhhZmlzeHB2cmtrcGx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI1MjM1MTcsImV4cCI6MjA0ODA5OTUxN30.ldQh7QxpG08pERpOKl_-3gGr8CTYdPKGx83dDYJe5ZM"  # Ensure your environment variable is set
@@ -290,7 +282,7 @@ elif st.session_state.current_screen == "main_menu":
         limit=st.session_state.page_limit))
 
     # Display the icons for Add, Edit, and Delete actions
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2, col3, col4, col5 = st.columns(5)
     
     with col4:
         if st.button("➕ Add Expense"):
@@ -311,6 +303,10 @@ elif st.session_state.current_screen == "main_menu":
         if st.button("Show Heatmap"):
             st.session_state.current_screen = "heatmap_view"
             st.rerun()
+    # Add the refresh button in the second (right) column
+    with col5:
+        if st.button("🔄 Refresh"):
+            st.rerun()  # This will refresh the app by rerunning the entire script
 
     # Display the expenses DataFrame with expense ID included and no index column 
     if not expenses_df.empty: 
@@ -365,6 +361,9 @@ elif st.session_state.current_screen == "heatmap_view":
     if st.button("⬅️"):
         st.session_state.current_screen = "main_menu"
         st.rerun()
+    
+    if st.button("🔄"):
+        st.rerun()  # This will refresh the app by rerunning the entire script
 
 # Add Expense Screen
 elif st.session_state.current_screen == "add_expense":
