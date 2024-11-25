@@ -62,6 +62,7 @@ async def fetch_categories():
 
 # Function to fetch expenses with filters and pagination
 import pandas as pd
+import numpy as np  # Import numpy to handle int64
 import streamlit as st
 
 async def fetch_expenses(user_id, month_num=None, year=None, category_id=None, offset=0, limit=10):
