@@ -326,21 +326,48 @@ elif st.session_state.current_screen == "heatmap_view":
 elif st.session_state.current_screen == "add_expense":
     st.title("Add Expense")
 
+    # Inputs for expense details
     expense_name = st.text_input("Expense Name")
-    amount = st.number_input("Amount", min_value=0.01 , step=0.01)
+    amount = st.number_input("Amount", min_value=0.01, step=0.01)
     expense_date = st.date_input("Expense Date")
 
+    # Fetch categories
     categories_df = run_async(fetch_categories())
 
-    category_names = categories_df['category_name'].tolist()
-    category = st.selectbox("Category", category_names)
+    if categories_df.empty:
+        st.warning("No categories available. Please add categories first.")
+    else:
+        category_names = categories_df['category_name'].tolist()
+        category = st.selectbox("Category", category_names)
 
+        # Get category_id for selected category
+        try:
+            category_id = categories_df[categories_df['category_name'] == category]['category_id'].values[0]
+        except IndexError:
+            st.error("Failed to fetch the category ID. Please check the category data.")
+            category_id = None
+
+    # Save Expense Button
     if st.button("Save Expense"):
-        category_id = categories_df[categories_df['category_name'] == category]['category_id'].values[0]
-        run_async(add_expense(st.session_state.user_id, expense_name, amount, expense_date, category_id))
-        st.session_state.current_screen = "main_menu"
-        st.rerun()
+        if not expense_name or not amount or not expense_date or not category_id:
+            st.error("All fields are required to add an expense.")
+        else:
+            # Run async function to add the expense
+            result = run_async(
+                add_expense(
+                    st.session_state.user_id,
+                    expense_name,
+                    amount,
+                    expense_date.isoformat(),
+                    category_id
+                )
+            )
+            if result:
+                st.success("Expense added successfully!")
+                st.session_state.current_screen = "main_menu"
+                st.rerun()
 
+    # Cancel Button
     if st.button("Cancel"):
         st.session_state.current_screen = "main_menu"
         st.rerun()
