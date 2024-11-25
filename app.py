@@ -147,6 +147,13 @@ async def fetch_expenses(user_id, month_num=None, year=None, category_id=None, o
 # Function to update an expense based on expense_id and user_id
 async def update_expense(expense_id, user_id, expense_name, amount, expense_date, category_id):
     try:
+        # Convert int64 to regular int
+        expense_id = int(expense_id)
+        user_id = int(user_id)
+        category_id = int(category_id)
+        amount = float(amount)  # Ensure amount is a float
+
+        # Update the expense
         response = supabase.table('expenses').update({
             'expense_name': expense_name,
             'amount': amount,
@@ -156,8 +163,12 @@ async def update_expense(expense_id, user_id, expense_name, amount, expense_date
         
         if response.status_code == 204:
             st.success("Expense updated successfully!")
+        else:
+            st.error(f"Error updating expense: {response.error}")
     except Exception as e:
         st.error(f"Error updating expense: {e}")
+        logging.error(f"Error updating expense: {e}")
+
 
 # Function to delete an expense
 async def delete_expense(expense_id):
