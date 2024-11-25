@@ -294,6 +294,9 @@ elif st.session_state.current_screen == "heatmap_view":
     if st.button("⬅️"):
         st.session_state.current_screen = "main_menu"
         st.rerun()
+import pandas as pd
+import numpy as np  # Required for handling types
+import streamlit as st
 
 # Add Expense Screen
 elif st.session_state.current_screen == "add_expense":
@@ -303,13 +306,15 @@ elif st.session_state.current_screen == "add_expense":
     amount = st.number_input("Amount", min_value=0.01 , step=0.01)
     expense_date = st.date_input("Expense Date")
 
-    categories_df = run_async(fetch_categories())
+    categories_df = run_async(fetch_categories())  # Fetch categories
 
     category_names = categories_df['category_name'].tolist()
     category = st.selectbox("Category", category_names)
 
     if st.button("Save Expense"):
+        # Ensure category_id is retrieved correctly
         category_id = categories_df[categories_df['category_name'] == category]['category_id'].values[0]
+        # Adding the expense using the API call
         run_async(add_expense(st.session_state.user_id, expense_name, amount, expense_date, category_id))
         st.session_state.current_screen = "main_menu"
         st.rerun()
@@ -342,6 +347,8 @@ elif st.session_state.current_screen == "edit_expense":
             expense_name = st.text_input("Expense Name", expense_details['Expense Name'])
             amount = st.number_input("Amount", min_value=0.0, step=0.01, value=float(expense_details['Amount']))
             expense_date = st.date_input("Expense Date", pd.to_datetime(expense_details['Expense Date']))
+            
+            # Fetch categories for the select box
             categories_df = run_async(fetch_categories())
             category_names = categories_df['category_name'].tolist()
             current_category = expense_details['Category']
