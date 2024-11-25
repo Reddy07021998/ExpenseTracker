@@ -52,13 +52,13 @@ def run_async(coro):
 
 async def add_expense(user_id, expense_name, amount, expense_date, category_id):
     try:
-        # Convert all inputs to native Python types
+        # Ensure all data is in the correct format
         user_id = int(user_id)
         category_id = int(category_id)
-        amount = float(amount)  # In case it's a numpy float64
-        expense_date = str(expense_date)  # Ensure it's a string in ISO format
+        amount = float(amount)  # Convert to a standard float
+        expense_date = str(expense_date)  # Ensure the date is a string in ISO format
 
-        # Insert data into the Supabase 'expenses' table
+        # Insert data into the 'expenses' table
         response = supabase.table('expenses').insert({
             'user_id': user_id,
             'expense_name': expense_name,
@@ -67,24 +67,19 @@ async def add_expense(user_id, expense_name, amount, expense_date, category_id):
             'category_id': category_id
         }).execute()
 
-        # Check for errors in the response
-        if response.error:
-            st.error(f"Failed to add expense: {response.error.message}")
+        # Check the response
+        if response.status_code != 200:  # 200 is the success code
+            st.error(f"Failed to add expense: {response.json()}")
             return False
 
-        logging.info(f"Response: {response.data}")
-        logging.error(f"Error: {response.error}")
-
-
-        # Successfully added the expense
         st.success("Expense added successfully!")
         return True
 
     except Exception as e:
+        # Log and show the exception
         logging.error(f"Error adding expense: {e}")
         st.error(f"Error adding expense: {e}")
         return False
-
 
 # Function to fetch categories
 async def fetch_categories():
