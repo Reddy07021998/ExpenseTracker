@@ -66,62 +66,50 @@ import numpy as np  # Required for handling types
 import streamlit as st
 
 async def fetch_expenses(user_id, month_num=None, year=None, category_id=None, offset=0, limit=10):
-    try:
-        # Handle category_id to ensure it is an integer (in case it's passed as np.int64)
-        if isinstance(category_id, np.int64):
-            category_id = int(category_id)
-        
-        # Prepare parameters for the RPC call
-        params = {
-            "user_id_input": user_id,  # user_id is an integer from the `users` table
-            "month_num_input": month_num,
-            "year_input": year,
-            "category_id_input": category_id,
-            "offset_input": offset,
-            "limit_input": limit
-        }
+  try:
+    # Handle category_id to ensure it is an integer (in case it's passed as np.int64)
+    if isinstance(category_id, np.int64):
+      category_id = int(category_id)
 
-        # Call the RPC function or table query
-        response = supabase.rpc("fetch_expenses", params).execute()
+    # Prepare parameters for the RPC call
+    params = {
+      "user_id_input": user_id,  # user_id is an integer from the `users` table
+      "month_num_input": month_num,
+      "year_input": year,
+      "category_id_input": category_id,
+      "offset_input": offset,
+      "limit_input": limit
+    }
 
-        # Debug: Print raw response data to inspect
-        st.write("Raw response data:", response.data)
+    # Call the RPC function or table query
+    response = supabase.rpc("fetch_expenses", params).execute()
 
-        # Convert response to a DataFrame
-        if response.data:
-            cleaned_data = []
+    # Convert response to a DataFrame
+    if response.data:
+      cleaned_data = []
+      for row in response.data:
+        cleaned_row = {}
+        for key, value in row.items():
+          # If the value is of type np.int64, convert it to a regular int
+          if isinstance(value, np.int64):
+            cleaned_row[key] = int(value)
+          else:
+            cleaned_row[key] = value
+        cleaned_data.append(cleaned_row)
 
-            # Ensure all int64 are converted to Python native int (serializable by JSON)
-            for row in response.data:
-                cleaned_row = {}
-                for key, value in row.items():
-                    # If the value is of type np.int64, convert it to a regular int
-                    if isinstance(value, np.int64):
-                        cleaned_row[key] = int(value)
-                    else:
-                        cleaned_row[key] = value
-                cleaned_data.append(cleaned_row)
+      df = pd.DataFrame(cleaned_data)
 
-            # Convert cleaned data to DataFrame
-            df = pd.DataFrame(cleaned_data)
+      # Rename columns
+      df.columns = ['Expense ID', 'Expense Name', 'Amount', 'Expense Date', 'Category']
 
-            # Debug: Check DataFrame types before conversion
-            st.write("DataFrame types before conversion:", df.dtypes)
+      return df
+    else:
+      return pd.DataFrame(columns=['Expense ID', 'Expense Name', 'Amount', 'Expense Date', 'Category'])
 
-            # Rename columns
-            df.columns = ['Expense ID', 'Expense Name', 'Amount', 'Expense Date', 'Category']
-
-            # Debug: Check DataFrame after renaming columns
-            st.write("DataFrame after column rename:", df)
-
-            return df
-        else:
-            return pd.DataFrame(columns=['Expense ID', 'Expense Name', 'Amount', 'Expense Date', 'Category'])
-
-    except Exception as e:
-        st.error(f"Error fetching expenses: {e}")
-        return pd.DataFrame(columns=['Expense ID', 'Expense Name', 'Amount', 'Expense Date', 'Category'])
-
+  except Exception as e:
+    st.error(f"Error fetching expenses: {e}")
+    return pd.DataFrame(columns=['Expense ID', 'Expense Name', 'Amount', 'Expense Date', 'Category'])
+      
 # Function to update an expense based on expense_id and user_id
 async def update_expense(expense_id, user_id, expense_name, amount, expense_date, category_id):
     try:
