@@ -84,8 +84,10 @@ async def fetch_expenses(user_id, month_num=None, year=None, category_id=None, o
         if response.data:
             df = pd.DataFrame(response.data)
 
-            # Convert all numeric columns from int64 to native int for JSON serialization
-            df = df.applymap(lambda x: int(x) if isinstance(x, (np.integer, np.int64)) else x)
+            # Convert all columns of type int64 to native Python int
+            for column in df.columns:
+                if pd.api.types.is_integer_dtype(df[column]):
+                    df[column] = df[column].apply(lambda x: int(x))
 
             # Ensure column names match the expected output
             df.columns = ['Expense ID', 'Expense Name', 'Amount', 'Expense Date', 'Category']
