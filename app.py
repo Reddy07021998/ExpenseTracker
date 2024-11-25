@@ -63,30 +63,9 @@ async def fetch_categories():
 # Function to fetch expenses with filters and pagination
 async def fetch_expenses(user_id, month_num=None, year=None, category_id=None, offset=0, limit=10):
     try:
-        # Convert user_id and category_id to strings first
-        user_id = str(user_id)
-        if category_id is not None:
-            category_id = str(category_id)
-
-        # Validate UUID format only if input is not empty
-        from uuid import UUID
-
-        try:
-            user_id = str(UUID(user_id))  # Validate user_id as UUID
-        except ValueError:
-            st.error("Invalid user ID. Please provide a valid UUID.")
-            return pd.DataFrame(columns=['Expense ID', 'Expense Name', 'Amount', 'Expense Date', 'Category'])
-
-        if category_id:
-            try:
-                category_id = str(UUID(category_id))  # Validate category_id as UUID
-            except ValueError:
-                st.error("Invalid category ID. Please provide a valid UUID.")
-                return pd.DataFrame(columns=['Expense ID', 'Expense Name', 'Amount', 'Expense Date', 'Category'])
-
         # Prepare parameters for the RPC call
         params = {
-            "user_id_input": user_id,
+            "user_id_input": user_id,  # user_id is an integer from the `users` table
             "month_num_input": month_num,
             "year_input": year,
             "category_id_input": category_id,
@@ -94,13 +73,10 @@ async def fetch_expenses(user_id, month_num=None, year=None, category_id=None, o
             "limit_input": limit
         }
 
-        # Log parameters for debugging
-        st.write(f"Parameters: {params}")
-
-        # Call the RPC function
+        # Call the RPC function or table query
         response = supabase.rpc("fetch_expenses", params).execute()
 
-        # Convert the result to a DataFrame
+        # Convert response to a DataFrame
         if response.data:
             df = pd.DataFrame(response.data)
             df.columns = ['Expense ID', 'Expense Name', 'Amount', 'Expense Date', 'Category']
