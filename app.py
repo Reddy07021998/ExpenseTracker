@@ -282,7 +282,7 @@ elif st.session_state.current_screen == "main_menu":
         limit=st.session_state.page_limit))
 
     # Display the icons for Add, Edit, and Delete actions
-    col1, col2, col3, col4, col5 = st.columns(5)
+    col1, col2, col3, col4 = st.columns(4)
     
     with col4:
         if st.button("➕ Add Expense"):
@@ -302,11 +302,7 @@ elif st.session_state.current_screen == "main_menu":
     with col1:
         if st.button("Show Heatmap"):
             st.session_state.current_screen = "heatmap_view"
-            st.rerun()
-    # Add the refresh button in the second (right) column
-    with col5:
-        if st.button("🔄 Refresh"):
-            st.rerun()  # This will refresh the app by rerunning the entire script
+            st.rerun()        
 
     # Display the expenses DataFrame with expense ID included and no index column 
     if not expenses_df.empty: 
@@ -328,6 +324,9 @@ elif st.session_state.current_screen == "main_menu":
         if (st.button("Next →")): 
             # Go to next page 
             st.session_state.page_offset += (st.session_state.page_limit)
+            
+    if st.button("🔄 Refresh"):
+            st.rerun() 
 
     if st.button("Logout"): 
         st.session_state.user_id = None  
@@ -361,9 +360,6 @@ elif st.session_state.current_screen == "heatmap_view":
     if st.button("⬅️"):
         st.session_state.current_screen = "main_menu"
         st.rerun()
-    
-    if st.button("🔄"):
-        st.rerun()  # This will refresh the app by rerunning the entire script
 
 # Add Expense Screen
 elif st.session_state.current_screen == "add_expense":
