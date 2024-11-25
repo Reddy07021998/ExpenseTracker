@@ -61,6 +61,10 @@ async def fetch_categories():
         return pd.DataFrame(columns=['category_id', 'category_name'])
 
 # Function to fetch expenses with filters and pagination
+import pandas as pd
+import streamlit as st
+
+# Function to fetch expenses with filters and pagination
 async def fetch_expenses(user_id, month_num=None, year=None, category_id=None, offset=0, limit=10):
     try:
         # Prepare parameters for the RPC call
@@ -68,7 +72,7 @@ async def fetch_expenses(user_id, month_num=None, year=None, category_id=None, o
             "user_id_input": user_id,  # user_id is an integer from the `users` table
             "month_num_input": month_num,
             "year_input": year,
-            "category_id_input": category_id,
+            "category_id_input": category_id,  # category_id should match the database type (integer)
             "offset_input": offset,
             "limit_input": limit
         }
