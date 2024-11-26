@@ -25,6 +25,7 @@ def set_background(image_url):
         .stApp {{
             background-image: url("{image_url}");
             background-size: cover;
+            background-position: center;
             background-repeat: no-repeat;
         }}
         <style>
@@ -36,7 +37,7 @@ def set_background(image_url):
         }}
         div[data-testid="stVerticalBlock"] {{
             background-color: rgba(255, 255, 255, 0.8); /* White with 90% transparency */
-            border-radius: 15px;
+            border-radius: 20px;
             padding: 15px;
         }}
         </style>
