@@ -25,7 +25,6 @@ def set_background(image_url):
         .stApp {{
             background-image: url("{image_url}");
             background-size: cover;
-            background-position: center;
             background-repeat: no-repeat;
         }}
         <style>
