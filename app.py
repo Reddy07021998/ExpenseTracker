@@ -40,11 +40,9 @@ def set_background(image_url):
         unsafe_allow_html=True,
     )
 
-
-# Call this function at the start of your app to set the background
 # Call this function at the start of your app to set the background
 login_image_url = "https://github.com/Reddy07021998/ExpenseTracker/blob/main/dashboard_icon.png"
-
+set_background(login_image_url)
 # Function to authenticate a user
 async def authenticate_user(username, password):
     try:
