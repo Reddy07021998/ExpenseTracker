@@ -27,7 +27,7 @@ def set_background(image_url):
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            height: 50vh; /* Make sure the app occupies the full viewport height */
+            height: 100vh; /* Make sure the app occupies the full viewport height */
             margin: 0;
         }}
         div[data-testid="stVerticalBlock"] {{
@@ -41,6 +41,7 @@ def set_background(image_url):
         """, 
         unsafe_allow_html=True
     )
+
 
 
 # Call this function at the start of your app to set the background
