@@ -36,9 +36,9 @@ def set_background(image_url):
             background-repeat: no-repeat;
         }}
         div[data-testid="stVerticalBlock"] {{
-            background-color: rgba(255, 255, 255, 0.8); /* White with 80% transparency */
-            border-radius: 10px;
-            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.8); /* White with 90% transparency */
+            border-radius: 15px;
+            padding: 15px;
         }}
         </style>
 		""", 
@@ -50,7 +50,7 @@ def set_background(image_url):
 set_background(logo_path)
 
 # Display the logo
-st.logo(logo_path)
+# st.logo(logo_path)
 
 # Configure logging
 logging.basicConfig(
