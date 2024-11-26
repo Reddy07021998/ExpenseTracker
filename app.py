@@ -358,7 +358,7 @@ elif st.session_state.current_screen == "main_menu":
  
 # Heatmap Screen
 elif st.session_state.current_screen == "heatmap_view":
-    st.title("Expense Heatmap")
+    st.title("Expense Chart")
 
     try:
         expenses_df = run_async(fetch_expenses(st.session_state.user_id))
