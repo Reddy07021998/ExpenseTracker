@@ -388,9 +388,9 @@ elif st.session_state.current_screen == "heatmap_view":
     except Exception as e:
         st.error(f"Error generating heatmap: {e}")
 
-    if st.button("⬅️"):
-        st.session_state.current_screen = "main_menu"
-        st.rerun()
+        if st.button("⬅️"):
+            st.session_state.current_screen = "main_menu"
+            st.rerun()
 
 # Add Expense Screen
 elif st.session_state.current_screen == "add_expense":
@@ -442,9 +442,9 @@ elif st.session_state.current_screen == "add_expense":
         st.session_state.current_screen = "main_menu"
         st.rerun()
 
-if st.button("⬅️"):
-        st.session_state.current_screen = "main_menu"
-        st.rerun()
+    if st.button("⬅️"):
+            st.session_state.current_screen = "main_menu"
+            st.rerun()
 
 
         
@@ -495,9 +495,9 @@ elif st.session_state.current_screen == "edit_expense":
                 st.session_state.current_screen = "main_menu"
                 st.rerun()
                 
-    if st.button("⬅️"):
-        st.session_state.current_screen = "main_menu"
-        st.rerun()
+        if st.button("⬅️"):
+            st.session_state.current_screen = "main_menu"
+            st.rerun()
 
 # Delete Expense Screen
 elif st.session_state.current_screen == "confirm_delete":
@@ -545,6 +545,6 @@ elif st.session_state.current_screen == "confirm_delete":
                 st.session_state.current_screen = "main_menu"
                 st.rerun()
                 
-if st.button("⬅️"):
-        st.session_state.current_screen = "main_menu"
-        st.rerun()
+    if st.button("⬅️"):
+            st.session_state.current_screen = "main_menu"
+            st.rerun()
