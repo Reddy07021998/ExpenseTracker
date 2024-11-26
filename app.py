@@ -312,27 +312,31 @@ elif st.session_state.current_screen == "main_menu":
         limit=st.session_state.page_limit))
 
     # Display the icons for Add, Edit, and Delete actions
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2, col3, col4, col5 = st.columns(5)
     
     with col3:
-        if st.button("➕ Add Expense"):
+        if st.button("➕"):
             st.session_state.current_screen = "add_expense"
             st.rerun()
     
     with col2:
-        if st.button("✏️ Edit Expense"):
+        if st.button("✏️"):
             st.session_state.current_screen = "edit_expense"
             st.rerun()
 
     with col4:
-        if st.button("🗑️ Delete Expense"):
+        if st.button("🗑️"):
             st.session_state.current_screen = "confirm_delete"
             st.rerun()
 
     with col1:
-        if st.button("Show Heatmap"):
+        if st.button("📊"):
             st.session_state.current_screen = "heatmap_view"
             st.rerun()    
+
+    with col5:
+        if st.button("🔄"):
+            st.rerun()  
 
     # Display the expenses DataFrame with expense ID included and no index column 
     if not expenses_df.empty: 
@@ -437,6 +441,12 @@ elif st.session_state.current_screen == "add_expense":
     if st.button("Cancel"):
         st.session_state.current_screen = "main_menu"
         st.rerun()
+
+if st.button("⬅️"):
+        st.session_state.current_screen = "main_menu"
+        st.rerun()
+
+
         
 elif st.session_state.current_screen == "edit_expense":
     st.title("Edit Expense")
@@ -484,6 +494,10 @@ elif st.session_state.current_screen == "edit_expense":
             if st.button("Cancel"):
                 st.session_state.current_screen = "main_menu"
                 st.rerun()
+                
+    if st.button("⬅️"):
+        st.session_state.current_screen = "main_menu"
+        st.rerun()
 
 # Delete Expense Screen
 elif st.session_state.current_screen == "confirm_delete":
@@ -530,4 +544,7 @@ elif st.session_state.current_screen == "confirm_delete":
             if st.button("Cancel"):
                 st.session_state.current_screen = "main_menu"
                 st.rerun()
-
+                
+if st.button("⬅️"):
+        st.session_state.current_screen = "main_menu"
+        st.rerun()
