@@ -20,11 +20,11 @@ logging.basicConfig(
     level=logging.ERROR, 
     format="%(asctime)s - %(levelname)s - %(message)s")
 
-def set_background(image_url):
+# def set_background(image_url):
 st.markdown(f"""
 <style>
     body {{
-        background-image: url('{image_url}');
+        background-image: url('{"https://github.com/Reddy07021998/ExpenseTracker/blob/main/dashboard_icon.png"}');
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
@@ -35,8 +35,8 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # Call this function at the start of your app to set the background
-login_image_url = "https://github.com/Reddy07021998/ExpenseTracker/blob/main/dashboard_icon.png"
-set_background(login_image_url)
+# login_image_url = "https://github.com/Reddy07021998/ExpenseTracker/blob/main/dashboard_icon.png"
+# set_background(login_image_url)
 # Function to authenticate a user
 async def authenticate_user(username, password):
     try:
