@@ -20,6 +20,37 @@ logging.basicConfig(
     level=logging.ERROR, 
     format="%(asctime)s - %(levelname)s - %(message)s")
 
+def set_background(image_url):
+    st.markdown(
+        f"""
+        <style>
+        .stApp {{
+            background-image: url("{image_url}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }}
+        <style>
+        .stApp {{
+            background-image: url("{image_url}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }}
+        div[data-testid="stVerticalBlock"] {{
+            background-color: rgba(255, 255, 255, 0.8); /* White with 80% transparency */
+            border-radius: 10px;
+            padding: 10px;
+        }}
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+# Call this function at the start of your app to set the background
+# Call this function at the start of your app to set the background
+login_image_url = "https://www.google.com/url?sa=i&url=https%3A%2F%2Ficonscout.com%2Fillustrations%2Fexpense-management&psig=AOvVaw1op87Bhso2AN5LrnBCoeoe&ust=1732681367924000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCICggK2T-YkDFQAAAAAdAAAAABAE" 
+
 
 # Function to authenticate a user
 async def authenticate_user(username, password):
@@ -213,6 +244,10 @@ if 'user_id' not in st.session_state:
 
 # Login Screen
 if st.session_state.current_screen == "login":
+
+    # Add background image
+    add_background(login_imaage_url)
+    
     st.title("Login to Expense Tracker")
     with st.form("login_form"):
         username = st.text_input("Username")
