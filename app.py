@@ -22,7 +22,7 @@ logging.basicConfig(
 
 
 # URL for the background image (either GitHub URL or local file path)
-background_url = ""https://github.com/Reddy07021998/ExpenseTracker/blob/main/dashboard_icon.png""
+background_url = "https://github.com/Reddy07021998/ExpenseTracker/blob/main/dashboard_icon.png"
 
 # Use st.markdown to inject custom CSS for the background image
 st.markdown(
