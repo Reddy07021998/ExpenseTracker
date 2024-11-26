@@ -27,13 +27,13 @@ def set_background(image_url):
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            height: 100vh; /* Make sure the app occupies the full viewport height */
+            height: 50vh; /* Make sure the app occupies the full viewport height */
             margin: 0;
         }}
         div[data-testid="stVerticalBlock"] {{
             background-color: rgba(255, 255, 255, 0.8); /* White with 80% transparency */
-            border-radius: 20px;
-            padding: 15px;
+            border-radius: 10px;
+            padding: 10px;
             max-height: 90vh; /* Limit height to 90% of the viewport */
             overflow-y: auto; /* Add scroll bar if content overflows vertically */
         }}
