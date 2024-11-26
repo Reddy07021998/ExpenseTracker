@@ -246,7 +246,7 @@ if 'user_id' not in st.session_state:
 if st.session_state.current_screen == "login":
 
     # Add background image
-    add_background(login_imaage_url)
+    set_background(login_imaage_url)
     
     st.title("Login to Expense Tracker")
     with st.form("login_form"):
