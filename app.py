@@ -15,9 +15,22 @@ supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJl
 supabase: Client = create_client(supabaseUrl, supabaseKey)
 
 # Assuming your logo is in the same directory as your script
-# logo_path = "your_logo.png"
+logo_path = "https://github.com/Reddy07021998/ExpenseTracker/blob/main/dashboard_icon.png"
 
-st.logo("https://github.com/Reddy07021998/ExpenseTracker/blob/main/dashboard_icon.png")
+# Set a maximum width for the logo to ensure it fits well
+st.markdown(
+    """
+    <style>
+    .stLogo {
+        max-width: 200px;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+# Display the logo
+st.logo(logo_path)
 
 # Configure logging
 logging.basicConfig(
