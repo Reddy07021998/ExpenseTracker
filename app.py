@@ -15,7 +15,7 @@ supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJl
 supabase: Client = create_client(supabaseUrl, supabaseKey)
 
 # Assuming your logo is in the same directory as your script
-logo_path = "https://github.com/Reddy07021998/ExpenseTracker/blob/main/dashboard_icon.png"
+logo_path = "https://media.istockphoto.com/id/1527015796/photo/cost-and-quality-control-improve-work-efficiency-for-quality-control-and-company-cost.jpg?s=1024x1024&w=is&k=20&c=dhXWU5vCkd-0ImlR3WQeRKNz8eJERC45G_xZVmFAa8U="
 
 # Set a maximum width for the logo to ensure it fits well
 st.markdown(
