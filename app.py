@@ -20,27 +20,6 @@ logging.basicConfig(
     level=logging.ERROR, 
     format="%(asctime)s - %(levelname)s - %(message)s")
 
-
-# URL for the background image (either GitHub URL or local file path)
-background_url = "https://github.com/Reddy07021998/ExpenseTracker/blob/main/dashboard_icon.png"
-
-# Use st.markdown to inject custom CSS for the background image
-st.markdown(
-    f"""
-    <style>
-        body {{
-            background-image: url('{background_url}');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            height: 100vh;
-            margin: 0;
-        }}
-    </style>
-    """, 
-    unsafe_allow_html=True
-)
-
 # Function to authenticate a user
 async def authenticate_user(username, password):
     try:
