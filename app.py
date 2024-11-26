@@ -15,7 +15,7 @@ supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJl
 supabase: Client = create_client(supabaseUrl, supabaseKey)
 
 # Assuming your logo is in the same directory as your script
-logo_path = "https://media.istockphoto.com/id/1527015796/photo/cost-and-quality-control-improve-work-efficiency-for-quality-control-and-company-cost.jpg?s=1024x1024&w=is&k=20&c=dhXWU5vCkd-0ImlR3WQeRKNz8eJERC45G_xZVmFAa8U="
+logo_path = "https://media.istockphoto.com/id/2173949822/photo/businessman-draw-arrow-chart-financial-diagram-graph-and-profit-stock-market-chart-growth.jpg?s=612x612&w=0&k=20&c=evxcDWVXuV-W2JCZNH57h91EhSq8kOptnbujvR-y6iM="
 
 # Define a function to set the background
 def set_background(image_url):
