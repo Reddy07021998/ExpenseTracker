@@ -30,15 +30,8 @@ def set_background(image_url):
             background-position: center;
             background-repeat: no-repeat;
         }}
-        <style>
-        .stApp {{
-            background-image: url("{image_url}");
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-        }}
         div[data-testid="stVerticalBlock"] {{
-            background-color: rgba(255, 255, 255, 0.8); /* White with 80% transparency */
+            background-color: rgba(255, 255, 255, 0.8); /* Optional overlay for better readability */
             border-radius: 10px;
             padding: 10px;
         }}
@@ -46,6 +39,7 @@ def set_background(image_url):
         """,
         unsafe_allow_html=True,
     )
+
 
 # Call this function at the start of your app to set the background
 # Call this function at the start of your app to set the background
