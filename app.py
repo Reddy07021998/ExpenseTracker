@@ -21,24 +21,18 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s")
 
 def set_background(image_url):
-    st.markdown(
-        f"""
-        <style>
-        .stApp {{
-            background-image: url("{image_url}");
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-        }}
-        div[data-testid="stVerticalBlock"] {{
-            background-color: rgba(255, 255, 255, 0.8); /* Optional overlay for better readability */
-            border-radius: 10px;
-            padding: 10px;
-        }}
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
+st.markdown(f"""
+<style>
+    body {{
+        background-image: url('{image_url}');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        height: 100vh;
+        margin: 0;
+    }}
+</style>
+""", unsafe_allow_html=True)
 
 # Call this function at the start of your app to set the background
 login_image_url = "https://github.com/Reddy07021998/ExpenseTracker/blob/main/dashboard_icon.png"
