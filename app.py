@@ -17,17 +17,37 @@ supabase: Client = create_client(supabaseUrl, supabaseKey)
 # Assuming your logo is in the same directory as your script
 logo_path = "https://media.istockphoto.com/id/1527015796/photo/cost-and-quality-control-improve-work-efficiency-for-quality-control-and-company-cost.jpg?s=1024x1024&w=is&k=20&c=dhXWU5vCkd-0ImlR3WQeRKNz8eJERC45G_xZVmFAa8U="
 
-# Set a maximum width for the logo to ensure it fits well
-st.markdown(
-    """
-    <style>
-    .stLogo {
-        max-width: 200px;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+# Define a function to set the background
+def set_background(image_url):
+    st.markdown(
+        f"""
+        <style>
+        .stApp {{
+            background-image: url("{image_url}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }}
+        <style>
+        .stApp {{
+            background-image: url("{image_url}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }}
+        div[data-testid="stVerticalBlock"] {{
+            background-color: rgba(255, 255, 255, 0.8); /* White with 80% transparency */
+            border-radius: 10px;
+            padding: 10px;
+        }}
+        </style>
+		""", 
+		unsafe_allow_html=True
+    )
+
+# Call this function at the start of your app to set the background
+
+set_background(logo_path)
 
 # Display the logo
 st.logo(logo_path)
