@@ -14,6 +14,11 @@ supabaseUrl = 'https://gippopxafisxpvrkkplt.supabase.co'
 supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpcHBvcHhhZmlzeHB2cmtrcGx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI1MjM1MTcsImV4cCI6MjA0ODA5OTUxN30.ldQh7QxpG08pERpOKl_-3gGr8CTYdPKGx83dDYJe5ZM"  # Ensure your environment variable is set
 supabase: Client = create_client(supabaseUrl, supabaseKey)
 
+# Assuming your logo is in the same directory as your script
+logo_path = "your_logo.png"
+
+st.logo("https://github.com/Reddy07021998/ExpenseTracker/blob/main/dashboard_icon.png")
+
 # Configure logging
 logging.basicConfig(
     filename="expense_app.log", 
