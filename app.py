@@ -315,22 +315,22 @@ elif st.session_state.current_screen == "main_menu":
     col1, col2, col3, col4, col5 = st.columns(5)
     
     with col3:
-        if st.button("➕"):
+        if st.button("➕ Add"):
             st.session_state.current_screen = "add_expense"
             st.rerun()
     
     with col2:
-        if st.button("✏️"):
+        if st.button("✏️ Edit"):
             st.session_state.current_screen = "edit_expense"
             st.rerun()
 
     with col4:
-        if st.button("🗑️"):
+        if st.button("🗑️ Delete"):
             st.session_state.current_screen = "confirm_delete"
             st.rerun()
 
     with col1:
-        if st.button("📊"):
+        if st.button("📊 Chart"):
             st.session_state.current_screen = "heatmap_view"
             st.rerun()    
 
