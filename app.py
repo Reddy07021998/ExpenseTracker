@@ -32,14 +32,6 @@ async def authenticate_user(username, password):
     except Exception as e:
         st.error(f"Error authenticating user: {e}")
         return None
-        
-# encryption
-def hash_password(password: str) -> str:
-    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
-
-# Helper function to run async code within Streamlit's synchronous environment
-def run_async(coroutine_func):
-    return asyncio.run(coroutine_func)
 
 # Function to register a new user in Supabase
 async def register_user(username, email, password):
@@ -335,7 +327,7 @@ elif st.session_state.current_screen == "main_menu":
             st.rerun()    
 
     with col5:
-        if st.button("🔄"):
+        if st.button("🔄 Refresh"):
             st.rerun()  
 
     # Display the expenses DataFrame with expense ID included and no index column 
