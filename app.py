@@ -47,7 +47,7 @@ def set_background(image_url):
 
 # Call this function at the start of your app to set the background
 
-# set_background(login_path)
+--set_background(logo_path)
 
 # Display the logo
 # st.logo(logo_path)
@@ -250,7 +250,7 @@ if 'user_id' not in st.session_state:
 
 # Login Screen
 if st.session_state.current_screen == "login":
-    set_background(login_path)
+    
     st.title("Login to Expense Tracker")
     with st.form("login_form"):
         username = st.text_input("Username")
@@ -362,7 +362,7 @@ elif st.session_state.current_screen == "main_menu":
     with col1:
         if st.button("📊 Chart"):
             st.session_state.current_screen = "heatmap_view"
-            set_background(chart_path)
+            set_background(logo_path)
             st.rerun()    
 
     with col5:
@@ -397,7 +397,9 @@ elif st.session_state.current_screen == "main_menu":
  
 # Heatmap Screen
 elif st.session_state.current_screen == "heatmap_view":
-     st.title("Expense Chart")
+
+     https://media.istockphoto.com/id/1661342807/photo/business-work-management-analyzes-the-finances-of-the-company-businesswomen-show-analyzing.jpg?s=612x612&w=0&k=20&c=TxGg4CHkzl_u2B-ovqSpp1VWjQSctmNAFb3ZDkTTZrE=
+    st.title("Expense Chart")
 
     try:
         expenses_df = run_async(fetch_expenses(st.session_state.user_id))
