@@ -15,7 +15,8 @@ supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJl
 supabase: Client = create_client(supabaseUrl, supabaseKey)
 
 # Assuming your logo is in the same directory as your script
-logo_path = "https://media.istockphoto.com/id/1465188443/photo/businessman-new-year-business-goals-2024-positive-indicators-2024-positive-indicators-2024.jpg?s=612x612&w=0&k=20&c=rc5qTuVdnKIWoeD-S082LNQazw7qNiom9KdBdZ3rNxY="
+login_path = "https://media.istockphoto.com/id/1465188443/photo/businessman-new-year-business-goals-2024-positive-indicators-2024-positive-indicators-2024.jpg?s=612x612&w=0&k=20&c=rc5qTuVdnKIWoeD-S082LNQazw7qNiom9KdBdZ3rNxY="
+chart_path = "https://media.istockphoto.com/id/1495294087/photo/businessman-using-computer-analyzes-profitability-of-business-graph-on-visual-screen-digital.jpg?s=612x612&w=0&k=20&c=awl252nP9MUMqPYiyfINYtNoYsggfiEDFuSLSBSSqIY="
 
 # Define a function to set the background
 def set_background(image_url):
@@ -46,7 +47,7 @@ def set_background(image_url):
 
 # Call this function at the start of your app to set the background
 
-set_background(logo_path)
+# set_background(login_path)
 
 # Display the logo
 # st.logo(logo_path)
@@ -249,7 +250,7 @@ if 'user_id' not in st.session_state:
 
 # Login Screen
 if st.session_state.current_screen == "login":
-    
+    set_background(login_path)
     st.title("Login to Expense Tracker")
     with st.form("login_form"):
         username = st.text_input("Username")
@@ -272,8 +273,9 @@ if st.session_state.current_screen == "login":
 
 # Registration Screen
 elif st.session_state.current_screen == "register":
+     set_background(login_path)
     st.title("Register for Expense Tracker")
-
+  
     with st.form("register_form"):
         username = st.text_input("Username")
         email = st.text_input("Email")
@@ -395,6 +397,7 @@ elif st.session_state.current_screen == "main_menu":
  
 # Heatmap Screen
 elif st.session_state.current_screen == "heatmap_view":
+     set_background(chart_path)
     st.title("Expense Chart")
 
     try:
