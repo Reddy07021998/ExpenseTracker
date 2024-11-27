@@ -397,8 +397,6 @@ elif st.session_state.current_screen == "main_menu":
  
 # Heatmap Screen
 elif st.session_state.current_screen == "heatmap_view":
-
-     https://media.istockphoto.com/id/1661342807/photo/business-work-management-analyzes-the-finances-of-the-company-businesswomen-show-analyzing.jpg?s=612x612&w=0&k=20&c=TxGg4CHkzl_u2B-ovqSpp1VWjQSctmNAFb3ZDkTTZrE=
     st.title("Expense Chart")
 
     try:
