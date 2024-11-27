@@ -362,6 +362,7 @@ elif st.session_state.current_screen == "main_menu":
     with col1:
         if st.button("📊 Chart"):
             st.session_state.current_screen = "heatmap_view"
+            set_background(chart_path)
             st.rerun()    
 
     with col5:
@@ -396,7 +397,7 @@ elif st.session_state.current_screen == "main_menu":
  
 # Heatmap Screen
 elif st.session_state.current_screen == "heatmap_view":
-     set_background(chart_path)
+     
      st.title("Expense Chart")
 
     try:
