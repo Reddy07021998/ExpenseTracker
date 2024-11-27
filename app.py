@@ -274,7 +274,7 @@ if st.session_state.current_screen == "login":
 # Registration Screen
 elif st.session_state.current_screen == "register":
      set_background(login_path)
-    st.title("Register for Expense Tracker")
+     st.title("Register for Expense Tracker")
   
     with st.form("register_form"):
         username = st.text_input("Username")
