@@ -397,7 +397,6 @@ elif st.session_state.current_screen == "main_menu":
  
 # Heatmap Screen
 elif st.session_state.current_screen == "heatmap_view":
-     
      st.title("Expense Chart")
 
     try:
