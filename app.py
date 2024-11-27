@@ -47,7 +47,7 @@ def set_background(image_url):
 
 # Call this function at the start of your app to set the background
 
---set_background(logo_path)
+set_background(logo_path)
 
 # Display the logo
 # st.logo(logo_path)
@@ -362,7 +362,6 @@ elif st.session_state.current_screen == "main_menu":
     with col1:
         if st.button("📊 Chart"):
             st.session_state.current_screen = "heatmap_view"
-            set_background(logo_path)
             st.rerun()    
 
     with col5:
