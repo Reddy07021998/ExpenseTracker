@@ -273,8 +273,8 @@ if st.session_state.current_screen == "login":
 
 # Registration Screen
 elif st.session_state.current_screen == "register":
-     st.title("Register for Expense Tracker")
-  
+    st.title("Register for Expense Tracker")
+
     with st.form("register_form"):
         username = st.text_input("Username")
         email = st.text_input("Email")
