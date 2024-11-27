@@ -273,30 +273,29 @@ if st.session_state.current_screen == "login":
 
 # Registration Screen
 elif st.session_state.current_screen == "register":
-     set_background(login_path)
      st.title("Register for Expense Tracker")
   
-        with st.form("register_form"):
-            username = st.text_input("Username")
-            email = st.text_input("Email")
-            password = st.text_input("Password", type="password")
-            confirm_password = st.text_input("Confirm Password", type="password")
-            register_button = st.form_submit_button("Register")
-    
-        if register_button:
-            if password != confirm_password:
-                st.error("Passwords do not match.")
-            else:
-                # Run the registration process
-                run_async(register_user(username, email, password))
-                # After successful registration, go back to the login screen
-                st.session_state.current_screen = "login"
-                st.rerun()
-    
-        # Button to go back to the login screen
-        if st.button("Back to Login"):
+    with st.form("register_form"):
+        username = st.text_input("Username")
+        email = st.text_input("Email")
+        password = st.text_input("Password", type="password")
+        confirm_password = st.text_input("Confirm Password", type="password")
+        register_button = st.form_submit_button("Register")
+
+    if register_button:
+        if password != confirm_password:
+            st.error("Passwords do not match.")
+        else:
+            # Run the registration process
+            run_async(register_user(username, email, password))
+            # After successful registration, go back to the login screen
             st.session_state.current_screen = "login"
             st.rerun()
+
+    # Button to go back to the login screen
+    if st.button("Back to Login"):
+        st.session_state.current_screen = "login"
+        st.rerun()
 
 # Main Menu Screen
 elif st.session_state.current_screen == "main_menu":
