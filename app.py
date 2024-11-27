@@ -16,6 +16,7 @@ supabase: Client = create_client(supabaseUrl, supabaseKey)
 
 # Assuming your logo is in the same directory as your script
 logo_path = "https://media.istockphoto.com/id/2150829121/photo/analyzing-sales-data-and-market-growth-business-strategy-insights-finance-and-investment.jpg?s=612x612&w=0&k=20&c=56jK2mChXPja8GoUBKQAn5VbQRKd-Yvj5_Ox2bIfxpo="
+chart_path = "https://media.istockphoto.com/id/1495294087/photo/businessman-using-computer-analyzes-profitability-of-business-graph-on-visual-screen-digital.jpg?s=612x612&w=0&k=20&c=awl252nP9MUMqPYiyfINYtNoYsggfiEDFuSLSBSSqIY="
 
 # Define a function to set the background
 def set_background(image_url):
@@ -272,26 +273,37 @@ if st.session_state.current_screen == "login":
 
 # Registration Screen
 elif st.session_state.current_screen == "register":
+    # Set the background (optional, customize as needed)
+    set_background(chart_path)
+    
+    # Registration Form Title
     st.title("Register for Expense Tracker")
-
+    
+    # Form for user registration
     with st.form("register_form"):
-        username = st.text_input("Username")
-        email = st.text_input("Email")
-        password = st.text_input("Password", type="password")
-        confirm_password = st.text_input("Confirm Password", type="password")
+        username = st.text_input("Username", key="register_username")
+        email = st.text_input("Email", key="register_email")
+        password = st.text_input("Password", type="password", key="register_password")
+        confirm_password = st.text_input("Confirm Password", type="password", key="confirm_password")
         register_button = st.form_submit_button("Register")
 
+    # Registration process
     if register_button:
-        if password != confirm_password:
+        if not username or not email or not password:
+            st.error("Please fill in all the fields.")
+        elif password != confirm_password:
             st.error("Passwords do not match.")
         else:
-            # Run the registration process
-            run_async(register_user(username, email, password))
-            # After successful registration, go back to the login screen
-            st.session_state.current_screen = "login"
-            st.rerun()
-
-    # Button to go back to the login screen
+            try:
+                # Asynchronous function to register the user
+                run_async(register_user(username, email, password))
+                st.success("Registration successful! Please log in.")
+                st.session_state.current_screen = "login"
+                st.rerun()
+            except Exception as e:
+                st.error(f"Registration failed: {e}")
+    
+    # Option to go back to the login screen
     if st.button("Back to Login"):
         st.session_state.current_screen = "login"
         st.rerun()
