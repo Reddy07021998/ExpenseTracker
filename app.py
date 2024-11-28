@@ -377,6 +377,7 @@ elif st.session_state.current_screen == "main_menu":
 
     with col5:
         if st.button("🔄 Refresh"):
+            st.session_state.current_screen == "main_menu"
             st.rerun()  
 
     # Display the expenses DataFrame with expense ID included and no index column 
