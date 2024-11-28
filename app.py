@@ -15,8 +15,8 @@ supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJl
 supabase: Client = create_client(supabaseUrl, supabaseKey)
 
 # Assuming your logo is in the same directory as your script
-logo_path = "https://img.freepik.com/premium-photo/top-view-stylish-workspace-with-laptop-computer-coffee-cup-notebook-copy-space_35674-5781.jpg?ga=GA1.1.1158903708.1732594736&semt=ais_hybrid"
-chart_path = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQlkf5w_kMhasj8ERvaGvasnxqX76OUDGOLuA&s"
+login_img = "https://img.freepik.com/premium-photo/top-view-stylish-workspace-with-laptop-computer-coffee-cup-notebook-copy-space_35674-5781.jpg?ga=GA1.1.1158903708.1732594736&semt=ais_hybrid"
+chart_img = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQlkf5w_kMhasj8ERvaGvasnxqX76OUDGOLuA&s"
 
 # Define a function to set the background
 def set_background(image_url):
@@ -47,10 +47,10 @@ def set_background(image_url):
 
 # Call this function at the start of your app to set the background
 
-set_background(logo_path)
+set_background(login_img)
 
 # Display the logo
-# st.logo(logo_path)
+# st.logo(login_img)
 
 # Configure logging
 logging.basicConfig(
