@@ -274,7 +274,7 @@ if st.session_state.current_screen == "login":
 # Registration Screen
 elif st.session_state.current_screen == "register":
     # Set the background (optional, customize as needed)
-    set_background(chart_img)
+    set_background(login_img)
     
     # Registration Form Title
     st.title("Register for Expense Tracker")
