@@ -8,6 +8,10 @@ from supabase import create_client, Client
 import asyncio
 import numpy as np
 import logging
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Initialize Supabase client
 supabaseUrl = os.getenv('SUPABASE_URL')
