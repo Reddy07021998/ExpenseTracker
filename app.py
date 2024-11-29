@@ -138,6 +138,14 @@ async def add_expense(user_id, expense_name, amount, expense_date, category_id):
         logging.error(f"Error adding expense: {e}")
         st.error(f"Error adding expense: {e}")
         return False
+    if response.status_code == 201:
+            st.success("Expense added successfully!")
+        else:
+            st.error(f"Failed to add expense: {response.error}")
+    except ValueError as ve:
+        st.error(f"Invalid input: {ve}. Please check your data.")
+    except Exception as e:
+        st.error(f"An unexpected error occurred: {e}")
 
 
 # Function to fetch categories
