@@ -101,18 +101,15 @@ async def register_user(username, email, password):
 def run_async(coro):
     return asyncio.run(coro)
 
-import logging
-import streamlit as st
-
 async def add_expense(user_id, expense_name, amount, expense_date, category_id):
     try:
-        # Validate and format inputs
+        # Ensure all data is in the correct format
         user_id = int(user_id)
         category_id = int(category_id)
-        amount = float(amount)
-        expense_date = str(expense_date)  # Ensure date is a string in ISO format
+        amount = float(amount)  # Convert to a standard float
+        expense_date = str(expense_date)  # Ensure the date is a string in ISO format
 
-        # Insert the data into the 'expenses' table
+        # Insert data into the 'expenses' table
         response = supabase.table('expenses').insert({
             'user_id': user_id,
             'expense_name': expense_name,
@@ -121,29 +118,26 @@ async def add_expense(user_id, expense_name, amount, expense_date, category_id):
             'category_id': category_id
         }).execute()
 
-        # Log the response for debugging
+        # Debugging: print or log the response
         logging.debug(f"Response from Supabase: {response}")
 
-        # Check the response for success or error
+        # Check if 'data' or 'error' attributes exist
         if response and hasattr(response, 'data') and response.data:
             st.success("Expense added successfully!")
             return True
-        elif response and hasattr(response, 'error') and response.error:
+
+        if response and hasattr(response, 'error') and response.error:
             st.error(f"Failed to add expense: {response.error}")
             return False
-        else:
-            st.error("Failed to add expense: Unknown error occurred.")
-            return False
 
-    except ValueError as ve:
-        st.error(f"Invalid input: {ve}. Please check your data.")
-        logging.error(f"ValueError: {ve}")
+        st.error("Failed to add expense: Unknown error occurred.")
         return False
+
     except Exception as e:
-        st.error(f"An unexpected error occurred: {e}")
-        logging.error(f"Exception: {e}")
+        # Log and show the exception
+        logging.error(f"Error adding expense: {e}")
+        st.error(f"Error adding expense: {e}")
         return False
-
 
 
 # Function to fetch categories
@@ -383,7 +377,6 @@ elif st.session_state.current_screen == "main_menu":
 
     with col5:
         if st.button("🔄 Refresh"):
-            st.session_state.current_screen == "main_menu"
             st.rerun()  
 
     # Display the expenses DataFrame with expense ID included and no index column 
@@ -494,6 +487,8 @@ elif st.session_state.current_screen == "add_expense":
             st.session_state.current_screen = "main_menu"
             st.rerun()
 
+
+        
 elif st.session_state.current_screen == "edit_expense":
     st.title("Edit Expense")
 
