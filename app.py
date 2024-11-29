@@ -8,19 +8,15 @@ from supabase import create_client, Client
 import asyncio
 import numpy as np
 import logging
-from dotenv import load_dotenv
-
-# Load environment variables from .env file
-load_dotenv()
 
 # Initialize Supabase client
-supabaseUrl = os.getenv('supabaseUrl')
-supabaseKey = os.getenv('supabaseKey')
+supabaseUrl = 'https://gippopxafisxpvrkkplt.supabase.co'
+supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpcHBvcHhhZmlzeHB2cmtrcGx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI1MjM1MTcsImV4cCI6MjA0ODA5OTUxN30.ldQh7QxpG08pERpOKl_-3gGr8CTYdPKGx83dDYJe5ZM"  # Ensure your environment variable is set
 supabase: Client = create_client(supabaseUrl, supabaseKey)
 
 # Assuming your logo is in the same directory as your script
-login_img = os.getenv('login_img')
-chart_img = os.getenv('chart_img')
+login_img = "https://img.freepik.com/premium-photo/top-view-stylish-workspace-with-laptop-computer-coffee-cup-notebook-copy-space_35674-5781.jpg?ga=GA1.1.1158903708.1732594736&semt=ais_hybrid"
+chart_img = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQlkf5w_kMhasj8ERvaGvasnxqX76OUDGOLuA&s"
 
 # Define a function to set the background
 def set_background(image_url):
