@@ -15,8 +15,8 @@ supabaseKey = os.getenv('SUPABASE_KEY')
 supabase: Client = create_client(supabaseUrl, supabaseKey)
 
 # Assuming your logo is in the same directory as your script
-login_img = "https://img.freepik.com/premium-photo/top-view-stylish-workspace-with-laptop-computer-coffee-cup-notebook-copy-space_35674-5781.jpg?ga=GA1.1.1158903708.1732594736&semt=ais_hybrid"
-chart_img = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQlkf5w_kMhasj8ERvaGvasnxqX76OUDGOLuA&s"
+login_img = os.getenv('login_img')
+chart_img = os.getenv('chart_img')
 
 # Define a function to set the background
 def set_background(image_url):
