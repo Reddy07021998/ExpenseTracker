@@ -14,8 +14,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Initialize Supabase client
-supabaseUrl = os.getenv('SUPABASE_URL')
-supabaseKey = os.getenv('SUPABASE_KEY')
+supabaseUrl = os.getenv('supabaseUrl')
+supabaseKey = os.getenv('supabaseKey')
 supabase: Client = create_client(supabaseUrl, supabaseKey)
 
 # Assuming your logo is in the same directory as your script
