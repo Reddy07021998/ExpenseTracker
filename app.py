@@ -455,6 +455,12 @@ elif st.session_state.current_screen == "heatmap_view":
             category_id= category_id # Filtered category
         ))
 
+        # Display editable DataFrame using experimental feature
+        edited_df = st.experimental_data_editor(expenses_df, use_container_width=True)
+        
+        # Display the updated DataFrame after edit
+        st.write("Updated DataFrame:", edited_df)
+
         if not expenses_df.empty:
             # Debugging: Print or log filtered data
             st.write("Filtered Expenses Data:")
