@@ -146,7 +146,7 @@ if st.session_state.current_screen == "login":
     st.title("Login to Expense Tracker")
 
 # Main Menu Screen
-elif st.session_state.current_screen == "main_menu":
+   st.session_state.current_screen == "main_menu":
     st.title("Expense Tracker Dashboard")
     # Initialize pagination state variables if they don't exist
     if 'page_offset' not in st.session_state:
