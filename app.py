@@ -455,24 +455,41 @@ elif st.session_state.current_screen == "heatmap_view":
             category_id= category_id # Filtered category
         ))
 
-        # Editable DataFrame (Manually)
-        st.write("Editable Table")
-        edited_data = []
-        for index, row in expenses_df.iterrows():
-            expense_id = st.text_input(f"Expense ID {index}", value=row['Expense ID'], key=f"id_{index}")
-            expense_name = st.text_input(f"Expense Name {index}", value=row['Expense Name'], key=f"name_{index}")
-            amount = st.number_input(f"Amount {index}", value=row['Amount'], key=f"amount_{index}", step=0.01)
-            expense_date = st.text_input(f"Expense Date {index}", value=row['Expense Date'], key=f"date_{index}")
-            category = st.text_input(f"Category {index}", value=row['Category'], key=f"category_{index}")
-            
-            edited_data.append([expense_id, expense_name, amount, expense_date, category])
+        expenses_df = pd.DataFrame(data)
+
+        # State management for the cell to edit
+        if "cell_to_edit" not in st.session_state:
+            st.session_state.cell_to_edit = None
+        if "edited_df" not in st.session_state:
+            st.session_state.edited_df = expenses_df.copy()
         
-        # Create the new edited DataFrame
-        edited_df = pd.DataFrame(edited_data, columns=expenses_df.columns)
+        # Display the DataFrame with clickable cells
+        st.write("### Expense Table")
+        for row_idx, row in st.session_state.edited_df.iterrows():
+            cols = st.columns(len(row))
+            for col_idx, (col_name, value) in enumerate(row.items()):
+                with cols[col_idx]:
+                    if st.button(f"{value}", key=f"cell_{row_idx}_{col_idx}"):
+                        st.session_state.cell_to_edit = (row_idx, col_name)
+        
+        # Check if a cell is clicked for editing
+        if st.session_state.cell_to_edit is not None:
+            row_idx, col_name = st.session_state.cell_to_edit
+        
+            # Modal-like popup for editing
+            with st.container():
+                st.write(f"### Edit Value in Row {row_idx + 1}, Column '{col_name}'")
+                new_value = st.text_input(f"New value for '{col_name}'", value=str(st.session_state.edited_df.at[row_idx, col_name]))
+                if st.button("Save"):
+                    # Update the value in the DataFrame
+                    st.session_state.edited_df.at[row_idx, col_name] = new_value
+                    st.session_state.cell_to_edit = None
+                if st.button("Cancel"):
+                    st.session_state.cell_to_edit = None
         
         # Display the updated DataFrame
-        st.write("Updated DataFrame:")
-        st.dataframe(edited_df)
+        st.write("### Updated Expense Table")
+        st.dataframe(st.session_state.edited_df)
 
         if not expenses_df.empty:
             # Debugging: Print or log filtered data
