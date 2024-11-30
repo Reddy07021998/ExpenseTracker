@@ -8,6 +8,7 @@ from supabase import create_client, Client
 import asyncio
 import numpy as np
 import logging
+import matplotlib
 
 # Initialize Supabase client
 supabaseUrl = 'https://gippopxafisxpvrkkplt.supabase.co'
