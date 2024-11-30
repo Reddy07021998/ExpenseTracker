@@ -423,23 +423,23 @@ elif st.session_state.current_screen == "heatmap_view":
             # Month Names Dropdown (Jan, Feb, etc.)
             month_names = ["All", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
             month = st.selectbox("Select Month", month_names)
-        
-            # Year Dropdown
-            year = st.selectbox("Select Year", ["All", 2023, 2024])
             
     with col2:
             # Category Dropdown
             category = st.selectbox("Select Category", ["All"] + category_names)
-        
-            # Determine category ID from category name
-            category_id = None if category == "All" else categories_df[categories_df['category_name'] == category]['category_id'].values[0]
 
     with col3:
-            # Determine month number from selected month
-            month_num = None if month == "All" else month_names.index(month)
-        
-            # Determine year from selected year
-            year_num = None if year == "All" else int(year)        
+            # Year Dropdown
+            year = st.selectbox("Select Year", ["All", 2023, 2024])
+
+    # Determine month number from selected month
+    month_num = None if month == "All" else month_names.index(month)
+
+    # Determine year from selected year
+    year_num = None if year == "All" else int(year)        
+
+    # Determine category ID from category name
+    category_id = None if category == "All" else categories_df[categories_df['category_name'] == category]['category_id'].values[0]
 
     try:
         # Fetch expenses data with filters applied (month, year, category)
