@@ -142,6 +142,25 @@ async def add_expense(user_id, expense_name, amount, expense_date, category_id):
         st.error(f"Error adding expense: {e}")
         return False
 
+async def fetch_expenses_data(user_id):
+    try:
+        response = supabase.table('expenses').select('expense_date, amount').eq('user_id', user_id).execute()
+        if response.data:
+            return pd.DataFrame(response.data)
+        else:
+            return pd.DataFrame(columns=['expense_date', 'amount'])
+    except Exception as e:
+        st.error(f"Error fetching expenses: {e}")
+        return pd.DataFrame(columns=['expense_date', 'amount'])
+
+
+def prepare_expenses_data(expenses_df):
+    # Ensure the 'expense_date' is in datetime format
+    expenses_df['expense_date'] = pd.to_datetime(expenses_df['expense_date'])
+    
+    # Group by date and sum the amounts
+    daily_expenses = expenses_df.groupby('expense_date')['amount'].sum().reset_index()
+    return daily_expenses
 
 # Function to fetch categories
 async def fetch_categories():
@@ -497,6 +516,38 @@ elif st.session_state.current_screen == "heatmap_view":
     if st.button("⬅️"):
         st.session_state.current_screen = "main_menu"
         st.rerun()
+import streamlit as st
+import plotly.express as px
+
+# Assuming you are in the main menu screen where the user is logged in
+if st.session_state.current_screen == "main_menu":
+    st.title("Daily Expenses Chart")
+
+    # Fetch and prepare the data
+    expenses_df = run_async(fetch_expenses_data(st.session_state.user_id))
+    daily_expenses_df = prepare_expenses_data(expenses_df)
+
+    if not daily_expenses_df.empty:
+        # Create a line chart using Plotly
+        fig = px.line(daily_expenses_df, x='expense_date', y='amount', 
+                      title='Daily Expenses',
+                      labels={'expense_date': 'Date', 'amount': 'Expense Amount'},
+                      markers=True)
+
+        # Customize layout
+        fig.update_layout(
+            xaxis_title='Date',
+            yaxis_title='Expense Amount (₹)',
+            plot_bgcolor='black',
+            paper_bgcolor='black',
+            font=dict(color='white'),
+            title_font=dict(size=18, color='white')
+        )
+
+        # Display the chart
+        st.plotly_chart(fig)
+    else:
+        st.write("No expenses found for the selected filters.")
 
 # Add Expense Screen
 elif st.session_state.current_screen == "add_expense":
