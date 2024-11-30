@@ -110,7 +110,7 @@ async def fetch_expenses(user_id, month_num=None, year=None, category_id=None, o
     return pd.DataFrame(columns=['Expense ID', 'Expense Name', 'Amount', 'Expense Date', 'Category'])
       
 # Main Menu Screen
-IF st.session_state.current_screen == "main_menu":
+
     st.title("Expense Tracker Dashboard")
     # Initialize pagination state variables if they don't exist
     if 'page_offset' not in st.session_state:
