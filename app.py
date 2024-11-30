@@ -455,12 +455,24 @@ elif st.session_state.current_screen == "heatmap_view":
             category_id= category_id # Filtered category
         ))
 
-        # Display editable DataFrame using experimental feature
-        edited_df = st.experimental_data_editor(expenses_df, use_container_width=True)
+        # Editable DataFrame (Manually)
+        st.write("Editable Table")
+        edited_data = []
+        for index, row in expenses_df.iterrows():
+            expense_id = st.text_input(f"Expense ID {index}", value=row['Expense ID'], key=f"id_{index}")
+            expense_name = st.text_input(f"Expense Name {index}", value=row['Expense Name'], key=f"name_{index}")
+            amount = st.number_input(f"Amount {index}", value=row['Amount'], key=f"amount_{index}", step=0.01)
+            expense_date = st.text_input(f"Expense Date {index}", value=row['Expense Date'], key=f"date_{index}")
+            category = st.text_input(f"Category {index}", value=row['Category'], key=f"category_{index}")
+            
+            edited_data.append([expense_id, expense_name, amount, expense_date, category])
         
+        # Create the new edited DataFrame
+        edited_df = pd.DataFrame(edited_data, columns=expenses_df.columns)
         
-        # Display the updated DataFrame after edit
-        st.write("Updated DataFrame:", edited_df)
+        # Display the updated DataFrame
+        st.write("Updated DataFrame:")
+        st.dataframe(edited_df)
 
         if not expenses_df.empty:
             # Debugging: Print or log filtered data
