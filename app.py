@@ -140,14 +140,11 @@ if 'user_id' not in st.session_state:
     st.session_state.user_id = None
 
 
-# Login Screen
-if st.session_state.current_screen == "login":
-    
-    st.title("Login to Expense Tracker")
-
 # Main Menu Screen
-    #st.session_state.current_screen == "main_menu":
+if st.session_state.current_screen == "main_menu":
+
     st.title("Expense Tracker Dashboard")
+    
     # Initialize pagination state variables if they don't exist
     if 'page_offset' not in st.session_state:
         st.session_state.page_offset = 0  # Initialize offset for pagination
