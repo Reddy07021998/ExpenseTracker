@@ -455,7 +455,7 @@ elif st.session_state.current_screen == "heatmap_view":
             category_id= category_id # Filtered category
         ))
 
-        expenses_df = pd.DataFrame(data)
+        expenses_df = pd.DataFrame(expenses_df)
 
         # State management for the cell to edit
         if "cell_to_edit" not in st.session_state:
