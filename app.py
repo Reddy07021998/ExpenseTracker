@@ -496,7 +496,7 @@ elif st.session_state.current_screen == "heatmap_view":
 
     # Navigation button
     if st.button("⬅️"):
-        st.session_state.current_screen = "main_menu st.rerun() ```python
+        st.session_state.current_screen = "main_menu"
         st.rerun()
 
 # Add Expense Screen
