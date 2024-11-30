@@ -17,63 +17,6 @@ supabaseUrl = 'https://gippopxafisxpvrkkplt.supabase.co'
 supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpcHBvcHhhZmlzeHB2cmtrcGx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI1MjM1MTcsImV4cCI6MjA0ODA5OTUxN30.ldQh7QxpG08pERpOKl_-3gGr8CTYdPKGx83dDYJe5ZM"  # Ensure your environment variable is set
 supabase: Client = create_client(supabaseUrl, supabaseKey)
 
-# Assuming your logo is in the same directory as your script
-login_img = "https://img.freepik.com/premium-photo/top-view-stylish-workspace-with-laptop-computer-coffee-cup-notebook-copy-space_35674-5781.jpg?ga=GA1.1.1158903708.1732594736&semt=ais_hybrid"
-chart_img = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQlkf5w_kMhasj8ERvaGvasnxqX76OUDGOLuA&s"
-
-# Define a function to set the background
-def set_background(image_url):
-    st.markdown(
-        f"""
-        <style>
-        .stApp {{
-            background-image: url("{image_url}");
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            height: 100vh; /* Make sure the app occupies the full viewport height */
-            margin: 0;
-        }}
-         div[data-testid="stVerticalBlock"] {{
-            background-color: transparent; /* Remove white box */
-            border-radius: 10px;
-            padding: 10px;
-            max-height: 90vh; /* Limit height to 90% of the viewport */
-            overflow-y: auto; /* Add scroll bar if content overflows vertically */
-        }}
-        </style>
-        """, 
-        unsafe_allow_html=True
-    )
-
-# Call this function at the start of your app to set the background
-
-set_background(login_img)
-
-# Display the logo
-# st.logo(login_img)
-
-# Configure logging
-logging.basicConfig(
-    filename="expense_app.log", 
-    level=logging.ERROR, 
-    format="%(asctime)s - %(levelname)s - %(message)s")
-
-# Function to authenticate a user
-async def authenticate_user(username, password):
-    try:
-        user_data = supabase.table('users').select('user_id, password_hash').eq('username', username).single().execute()
-        if user_data.data and bcrypt.checkpw(password.encode('utf-8'), user_data.data['password_hash'].encode('utf-8')):
-            return user_data.data['user_id']
-        else:
-            return None
-    except Exception as e:
-        st.error(f"Error authenticating user: {e}")
-        return None
-
-# Function to register a new user in Supabase
-
-
 # Function to fetch categories
 async def fetch_categories():
     try:
