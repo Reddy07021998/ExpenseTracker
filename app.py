@@ -407,28 +407,78 @@ elif st.session_state.current_screen == "main_menu":
  
 # Heatmap Screen
 elif st.session_state.current_screen == "heatmap_view":
+    set_background(chart_path)
     st.title("Expense Chart")
 
     try:
+        # Fetch expenses data
         expenses_df = run_async(fetch_expenses(st.session_state.user_id))
 
         if not expenses_df.empty:
-            expenses_df['Expense Date'] = pd.to_datetime(expenses_df['Expense Date'], errors='coerce').dt.date
+            # Preprocessing expenses data
+            expenses_df['Expense Date'] = pd.to_datetime(expenses_df['Expense Date'], errors='coerce').dt.to_period('M').astype(str)
             expenses_df['Amount'] = pd.to_numeric(expenses_df['Amount'], errors='coerce')
             expenses_df = expenses_df.dropna(subset=['Expense Date', 'Amount'])
 
+            # Heatmap visualization
             heatmap_data = expenses_df.groupby(['Expense Date', 'Category'])['Amount'].sum().unstack(fill_value=0)
-
             plt.figure(figsize=(10, 6))
             sns.heatmap(heatmap_data, annot=True, cmap="YlGnBu", fmt='.2f')
             st.pyplot(plt)
 
+            # Dual visualization: Bar chart + Line plot
+            st.subheader("Budget vs Need/Expense")
+
+            # Mocking or calculating the budget and expense aggregation
+            aggregated_df = expenses_df.groupby('Expense Date')['Amount'].sum().reset_index()
+            aggregated_df['Budget'] = 9000  # Set a fixed budget for demonstration
+
+            # Generate the dual visualization
+            import plotly.graph_objects as go
+
+            fig = go.Figure()
+
+            # Add bar chart for "Need/Expense"
+            fig.add_trace(go.Bar(
+                x=aggregated_df['Expense Date'],
+                y=aggregated_df['Amount'],
+                name="Need/Expense",
+                marker_color='red'
+            ))
+
+            # Add line plot for "Budget"
+            fig.add_trace(go.Scatter(
+                x=aggregated_df['Expense Date'],
+                y=aggregated_df['Budget'],
+                name="Budget",
+                mode='lines+markers',
+                line=dict(color='yellow', width=2),
+                marker=dict(size=8)
+            ))
+
+            # Customize layout
+            fig.update_layout(
+                title="Budget vs Need/Expense",
+                xaxis_title="Month",
+                yaxis_title="Amount (₹)",
+                legend_title="Legend",
+                barmode='group',
+                plot_bgcolor="black",
+                paper_bgcolor="black",
+                font=dict(color="white"),
+                title_font=dict(size=18, color="white")
+            )
+
+            # Display the chart in Streamlit
+            st.plotly_chart(fig)
+
         else:
-            st.write("No data available to generate heatmap.")
+            st.write("No data available to generate visualizations.")
 
     except Exception as e:
-        st.error(f"Error generating heatmap: {e}")
+        st.error(f"Error generating visualizations: {e}")
 
+    # Navigation button
     if st.button("⬅️"):
         st.session_state.current_screen = "main_menu"
         st.rerun()
