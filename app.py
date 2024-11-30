@@ -417,7 +417,7 @@ elif st.session_state.current_screen == "heatmap_view":
     categories_df = run_async(fetch_categories())
 
     # Display the icons for Add, Edit, and Delete actions
-    col1, col2, col3, col4, col5 = st.columns(5)
+    col1, col2, col3 = st.columns(3)
 
     with col1:
             # Month Names Dropdown (Jan, Feb, etc.)
