@@ -9,6 +9,8 @@ import asyncio
 import numpy as np
 import logging
 import matplotlib
+import plotly
+
 
 # Initialize Supabase client
 supabaseUrl = 'https://gippopxafisxpvrkkplt.supabase.co'
