@@ -321,6 +321,11 @@ elif st.session_state.current_screen == "main_menu":
         st.session_state.page_limit = 10  # Records per page
 
     categories_df = run_async(fetch_categories())
+
+    if categories_df.empty:
+        st.write("No categories available.")
+    else:
+        category_names = categories_df['category_name'].tolist()
     
     # Display the icons for Add, Edit, and Delete actions
     col11, col12, col13 = st.columns(3)
