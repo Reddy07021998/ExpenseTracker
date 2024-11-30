@@ -458,6 +458,7 @@ elif st.session_state.current_screen == "heatmap_view":
         # Display editable DataFrame using experimental feature
         edited_df = st.experimental_data_editor(expenses_df, use_container_width=True)
         
+        
         # Display the updated DataFrame after edit
         st.write("Updated DataFrame:", edited_df)
 
