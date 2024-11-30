@@ -444,7 +444,7 @@ elif st.session_state.current_screen == "heatmap_view":
 
             # Aggregate data for the bar chart and line plot
             aggregated_df = expenses_df.groupby('Expense Date')['Amount'].sum().reset_index()
-            aggregated_df['Budget'] = 9000  # Set a fixed budget for demonstration
+            #aggregated_df['Budget'] = 9000  # Set a fixed budget for demonstration
 
             # Generate the dual visualization
             import plotly.graph_objects as go
