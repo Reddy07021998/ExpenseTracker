@@ -374,9 +374,12 @@ elif st.session_state.current_screen == "main_menu":
             st.rerun()
 
     with col1:
-        if st.button("📊 Chart"):
-            st.session_state.current_screen = "heatmap_view"
-            st.rerun()    
+    if st.button("📊 Chart"):
+        st.session_state.current_screen = "heatmap_view"
+        st.session_state.month_num = month_num  # Store selected month
+        st.session_state.year_num = year_num    # Store selected year
+        st.session_state.category_id = category_id  # Store selected category
+        st.rerun()
 
     with col5:
         if st.button("🔄 Refresh"):
@@ -418,9 +421,9 @@ elif st.session_state.current_screen == "heatmap_view":
         # Fetch expenses data with filters applied (month, year, category)
         expenses_df = run_async(fetch_expenses(
             st.session_state.user_id,
-            month_num=st.session_state.get("month_num"),  # Filtered month
-            year=st.session_state.get("year_num"),       # Filtered year
-            category_id=st.session_state.get("category_id")  # Filtered category
+            month_num=st.session_state.month_num,  # Use stored month
+            year=st.session_state.year_num,       # Use stored year
+            category_id=st.session_state.category_id  # Use stored category
         ))
 
         if not expenses_df.empty:
@@ -493,7 +496,7 @@ elif st.session_state.current_screen == "heatmap_view":
 
     # Navigation button
     if st.button("⬅️"):
-        st.session_state.current_screen = "main_menu"
+        st.session_state.current_screen = "main_menu st.rerun() ```python
         st.rerun()
 
 # Add Expense Screen
