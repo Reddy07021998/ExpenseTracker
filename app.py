@@ -183,7 +183,6 @@ if st.session_state.current_screen == "main_menu":
         st.rerun()
  
 # Heatmap Screen
-# Heatmap Screen
 elif st.session_state.current_screen == "heatmap_view":
     set_background(chart_img)
     st.title("Expense Chart")
@@ -212,52 +211,6 @@ elif st.session_state.current_screen == "heatmap_view":
             plt.figure(figsize=(10, 6))
             sns.heatmap(heatmap_data, annot=True, cmap="YlGnBu", fmt='.2f')
             st.pyplot(plt)
-
-            # Dual visualization: Bar chart + Line plot
-            st.subheader("Budget vs Need/Expense")
-
-            # Aggregate data for the bar chart and line plot
-            aggregated_df = expenses_df.groupby('Expense Date')['Amount'].sum().reset_index()
-            #aggregated_df['Budget'] = 9000  # Set a fixed budget for demonstration
-
-            # Generate the dual visualization
-            import plotly.graph_objects as go
-
-            fig = go.Figure()
-
-            # Add bar chart for "Need/Expense"
-            fig.add_trace(go.Bar(
-                x=aggregated_df['Expense Date'],
-                y=aggregated_df['Amount'],
-                name="Need/Expense",
-                marker_color='red'
-            ))
-
-            # Add line plot for "Budget"
-            fig.add_trace(go.Scatter(
-                x=aggregated_df['Expense Date'],
-                y=aggregated_df['Budget'],
-                name="Budget",
-                mode='lines+markers',
-                line=dict(color='yellow', width=2),
-                marker=dict(size=8)
-            ))
-
-            # Customize layout
-            fig.update_layout(
-                title="Budget vs Need/Expense",
-                xaxis_title="Month",
-                yaxis_title="Amount (₹)",
-                legend_title="Legend",
-                barmode='group',
-                plot_bgcolor="black",
-                paper_bgcolor="black",
-                font=dict(color="white"),
-                title_font=dict(size=18, color="white")
-            )
-
-            # Display the chart in Streamlit
-            st.plotly_chart(fig)
 
         else:
             st.write("No data available to generate visualizations.")
