@@ -435,7 +435,6 @@ elif st.session_state.current_screen == "heatmap_view":
             category_id = None if category == "All" else categories_df[categories_df['category_name'] == category]['category_id'].values[0]
 
     with col3:
-    
             # Determine month number from selected month
             month_num = None if month == "All" else month_names.index(month)
         
