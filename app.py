@@ -415,6 +415,11 @@ elif st.session_state.current_screen == "heatmap_view":
     st.title("Expense Chart")
 
     categories_df = run_async(fetch_categories())
+    
+    if categories_df.empty:
+        st.write("No categories available.")
+    else:
+        category_names = categories_df['category_name'].tolist()
 
     # Display the icons for Add, Edit, and Delete actions
     col1, col2, col3 = st.columns(3)
