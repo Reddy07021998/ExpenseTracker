@@ -80,10 +80,7 @@ def run_async(coroutine_func):
 
 # Login Screen
 if st.title("Login to Expense Tracker"):
-
-# Main Menu Screen
-elif st.session_state.current_screen == "main_menu":
-    st.title("Expense Tracker Dashboard")
+   st.title("Expense Tracker Dashboard")
     # Initialize pagination state variables if they don't exist
     if 'page_offset' not in st.session_state:
         st.session_state.page_offset = 0  # Initialize offset for pagination
