@@ -408,7 +408,7 @@ elif st.session_state.current_screen == "main_menu":
  
 # Heatmap Screen
 elif st.session_state.current_screen == "heatmap_view":
-    set_background(chart_path)
+    set_background(chart_img)
     st.title("Expense Chart")
 
     try:
