@@ -6,3 +6,4 @@ matplotlib
 asyncpg
 supabase
 python-dotenv 
+plotly
