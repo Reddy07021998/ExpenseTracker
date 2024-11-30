@@ -414,13 +414,41 @@ elif st.session_state.current_screen == "heatmap_view":
     set_background(login_img)
     st.title("Expense Chart")
 
+    categories_df = run_async(fetch_categories())
+
+    # Display the icons for Add, Edit, and Delete actions
+    col1, col2, col3, col4, col5 = st.columns(5)
+
+    with col1:
+            # Month Names Dropdown (Jan, Feb, etc.)
+            month_names = ["All", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+            month = st.selectbox("Select Month", month_names)
+        
+            # Year Dropdown
+            year = st.selectbox("Select Year", ["All", 2023, 2024])
+            
+    with col2:
+            # Category Dropdown
+            category = st.selectbox("Select Category", ["All"] + category_names)
+        
+            # Determine category ID from category name
+            category_id = None if category == "All" else categories_df[categories_df['category_name'] == category]['category_id'].values[0]
+
+    with col3:
+    
+            # Determine month number from selected month
+            month_num = None if month == "All" else month_names.index(month)
+        
+            # Determine year from selected year
+            year_num = None if year == "All" else int(year)        
+
     try:
         # Fetch expenses data with filters applied (month, year, category)
         expenses_df = run_async(fetch_expenses(
             st.session_state.user_id,
-            month_num=st.session_state.get("month_num"),  # Filtered month
-            year=st.session_state.get("year_num"),       # Filtered year
-            category_id=st.session_state.get("category_id")  # Filtered category
+            month_num= month_num,  # Filtered month
+            year= year,       # Filtered year
+            category_id= category_id # Filtered category
         ))
 
         if not expenses_df.empty:
