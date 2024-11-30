@@ -409,15 +409,25 @@ elif st.session_state.current_screen == "main_menu":
         st.rerun()
  
 # Heatmap Screen
+# Heatmap Screen
 elif st.session_state.current_screen == "heatmap_view":
     set_background(chart_img)
     st.title("Expense Chart")
 
     try:
-        # Fetch expenses data
-        expenses_df = run_async(fetch_expenses(st.session_state.user_id))
+        # Fetch expenses data with filters applied (month, year, category)
+        expenses_df = run_async(fetch_expenses(
+            st.session_state.user_id,
+            month_num=st.session_state.get("month_num"),  # Filtered month
+            year=st.session_state.get("year_num"),       # Filtered year
+            category_id=st.session_state.get("category_id")  # Filtered category
+        ))
 
         if not expenses_df.empty:
+            # Debugging: Print or log filtered data
+            st.write("Filtered Expenses Data:")
+            st.dataframe(expenses_df)
+
             # Preprocessing expenses data
             expenses_df['Expense Date'] = pd.to_datetime(expenses_df['Expense Date'], errors='coerce').dt.to_period('M').astype(str)
             expenses_df['Amount'] = pd.to_numeric(expenses_df['Amount'], errors='coerce')
@@ -432,7 +442,7 @@ elif st.session_state.current_screen == "heatmap_view":
             # Dual visualization: Bar chart + Line plot
             st.subheader("Budget vs Need/Expense")
 
-            # Mocking or calculating the budget and expense aggregation
+            # Aggregate data for the bar chart and line plot
             aggregated_df = expenses_df.groupby('Expense Date')['Amount'].sum().reset_index()
             aggregated_df['Budget'] = 9000  # Set a fixed budget for demonstration
 
