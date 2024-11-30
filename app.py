@@ -365,12 +365,17 @@ elif st.session_state.current_screen == "main_menu":
     # Determine year from selected year
     year_num = None if year == "All" else int(year)
 
+    # Store selected values in session state
+    st.session_state.selected_month = month
+    st.session_state.selected_year = year
+    st.session_state.selected_category = category
+
     # Fetch expenses with filters and pagination
     expenses_df = run_async(fetch_expenses(
         st.session_state.user_id,
-        month_num=month_num,
-        year=year_num,
-        category_id=category_id,
+        month_num=st.session_state.selected_month,
+        year=st.session_state.selected_year,
+        category_id=st.session_state.selected_category,
         offset=st.session_state.page_offset,
         limit=st.session_state.page_limit))
 
@@ -395,9 +400,9 @@ elif st.session_state.current_screen == "main_menu":
     with col1:
         if st.button("📊 Chart"):
             st.session_state.current_screen = "heatmap_view"
-            st.session_state.month_num = month_num  # Store selected month
-            st.session_state.year_num = year_num    # Store selected year
-            st.session_state.category_id = category_id  # Store selected category
+            st.session_state.selected_month = month_num  # Store selected month
+            st.session_state.selected_year = year_num    # Store selected year
+            st.session_state.selected_category = category_id  # Store selected category
             st.rerun()
 
     with col5:
@@ -440,9 +445,9 @@ elif st.session_state.current_screen == "heatmap_view":
         # Fetch expenses data with filters applied (month, year, category)
         expenses_df = run_async(fetch_expenses(
             st.session_state.user_id,
-            month_num=st.session_state.month_num,  # Use stored month
-            year=st.session_state.year_num,       # Use stored year
-            category_id=st.session_state.category_id  # Use stored category
+            month_num=st.session_state.selected_month,  # Use stored month
+            year=st.session_state.selected_year,       # Use stored year
+            category_id=st.session_state.selected_category  # Use stored category
         ))
 
         if not expenses_df.empty:
