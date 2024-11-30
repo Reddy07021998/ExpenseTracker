@@ -76,11 +76,6 @@ async def fetch_expenses(user_id, month_num=None, year=None, category_id=None, o
 def run_async(coroutine_func):
     return asyncio.run(coroutine_func)
 
-# Initialize session state if it doesn't exist
-if 'current_screen' not in st.session_state:
-    st.session_state.current_screen = "login"
-if 'user_id' not in st.session_state:
-    st.session_state.user_id = None
 
 
 # Login Screen
@@ -222,3 +217,4 @@ elif st.session_state.current_screen == "heatmap_view":
     if st.button("⬅️"):
         st.session_state.current_screen = "main_menu"
         st.rerun()
+
