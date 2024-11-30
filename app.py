@@ -455,13 +455,6 @@ elif st.session_state.current_screen == "heatmap_view":
             category_id= category_id # Filtered category
         ))
 
-        # Select only the specific columns you want to display
-        selected_columns = ['Expense ID', 'Expense Name', 'Amount', 'Expense Date', 'Category']
-        expenses_df = expenses_df[selected_columns]
-        
-        # Display the updated DataFrame with only the selected columns
-        st.dataframe(expenses_df)
-
         if not expenses_df.empty:
             # Debugging: Print or log filtered data
             st.write("Filtered Expenses Data:")
