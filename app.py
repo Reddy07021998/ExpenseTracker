@@ -374,12 +374,12 @@ elif st.session_state.current_screen == "main_menu":
             st.rerun()
 
     with col1:
-    if st.button("📊 Chart"):
-        st.session_state.current_screen = "heatmap_view"
-        st.session_state.month_num = month_num  # Store selected month
-        st.session_state.year_num = year_num    # Store selected year
-        st.session_state.category_id = category_id  # Store selected category
-        st.rerun()
+        if st.button("📊 Chart"):
+            st.session_state.current_screen = "heatmap_view"
+            st.session_state.month_num = month_num  # Store selected month
+            st.session_state.year_num = year_num    # Store selected year
+            st.session_state.category_id = category_id  # Store selected category
+            st.rerun()
 
     with col5:
         if st.button("🔄 Refresh"):
