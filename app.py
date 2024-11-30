@@ -322,29 +322,30 @@ elif st.session_state.current_screen == "main_menu":
 
     categories_df = run_async(fetch_categories())
     
-    if categories_df.empty:
-        st.write("No categories available.")
-    else:
-        category_names = categories_df['category_name'].tolist()
+    # Display the icons for Add, Edit, and Delete actions
+    col1, col2, col3 = st.columns(3)
 
-    # Month Names Dropdown (Jan, Feb, etc.)
-    month_names = ["All", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-    month = st.selectbox("Select Month", month_names)
+    with col1:
+            # Month Names Dropdown (Jan, Feb, etc.)
+            month_names = ["All", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+            month = st.selectbox("Select Month", month_names)
+        
+            # Determine month number from selected month
+            month_num = None if month == "All" else month_names.index(month)
+            
+    with col2:
+            # Category Dropdown
+            category = st.selectbox("Select Category", ["All"] + category_names)
 
-    # Year Dropdown
-    year = st.selectbox("Select Year", ["All", 2023, 2024])
+            # Determine category ID from category name
+            category_id = None if category == "All" else categories_df[categories_df['category_name'] == category]['category_id'].values[0]
 
-    # Category Dropdown
-    category = st.selectbox("Select Category", ["All"] + category_names)
+    with col3:
+            # Year Dropdown
+            year = st.selectbox("Select Year", ["All", 2023, 2024])
 
-    # Determine category ID from category name
-    category_id = None if category == "All" else categories_df[categories_df['category_name'] == category]['category_id'].values[0]
-
-    # Determine month number from selected month
-    month_num = None if month == "All" else month_names.index(month)
-
-    # Determine year from selected year
-    year_num = None if year == "All" else int(year)
+            # Determine year from selected year
+            year_num = None if year == "All" else int(year)  
 
     # Fetch expenses with filters and pagination
     expenses_df = run_async(fetch_expenses(
