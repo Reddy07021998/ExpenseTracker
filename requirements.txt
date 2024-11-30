@@ -7,3 +7,4 @@ asyncpg
 supabase
 python-dotenv 
 plotly
+pip
