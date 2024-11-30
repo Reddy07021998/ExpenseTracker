@@ -79,9 +79,7 @@ def run_async(coroutine_func):
 
 
 # Login Screen
-if st.session_state.current_screen == "main_menu":
-    
-    st.title("Login to Expense Tracker")
+if st.title("Login to Expense Tracker")
 
 # Main Menu Screen
 elif st.session_state.current_screen == "main_menu":
