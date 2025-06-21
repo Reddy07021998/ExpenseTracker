@@ -314,15 +314,20 @@ elif st.session_state.current_screen == "register":
 
 # Main Menu Screen
 elif st.session_state.current_screen == "main_menu":
-    st.title("Expense Tracker Dashboard")
     st.markdown("""
-    <h1 style='text-align: center; 
-               color: #4CAF50; 
-               font-size: 40px; 
-               font-family: "Segoe UI", sans-serif; 
-               font-weight: bold; 
-               text-shadow: 2px 2px 4px #aaa; 
-               margin-bottom: 30px;'>
+    <h1 style='
+        text-align: center; 
+        color: #00ff99; 
+        background-color: black;
+        font-size: 40px; 
+        font-family: "Segoe UI", sans-serif; 
+        font-weight: bold; 
+        padding: 20px;
+        border-radius: 10px;
+        text-shadow: 0 0 10px #00ff99, 0 0 20px #00ff99, 0 0 30px #00ff99;
+        margin-bottom: 30px;
+        box-shadow: 0px 0px 20px rgba(0, 255, 153, 0.5);
+    '>
         📊 Expense Tracker Dashboard
     </h1>
 """, unsafe_allow_html=True)
