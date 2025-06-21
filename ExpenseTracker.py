@@ -497,17 +497,6 @@ elif st.session_state.current_screen == "heatmap_view":
             st.session_state.cell_to_edit = None
         if "edited_df" not in st.session_state:
             st.session_state.edited_df = expenses_df.copy()
-        
-        if not expenses_df.empty:
-
-            # Heatmap visualization
-            heatmap_data = expenses_df.groupby(['Expense Date', 'Category'])['Amount'].sum().unstack(fill_value=0)
-            plt.figure(figsize=(10, 6))
-            sns.heatmap(heatmap_data, annot=True, cmap="YlGnBu", fmt='.2f')
-            st.pyplot(plt)
-
-        else:
-            st.write("No data available to generate visualizations.")
 
         if not expenses_df.empty:
             # 🔥 Heatmap
