@@ -366,36 +366,25 @@ elif st.session_state.current_screen == "main_menu":
         offset=st.session_state.page_offset,
         limit=st.session_state.page_limit))
 
-    # Display the icons for Add, Edit, and Delete actions
-    col1, col2, col3, col4, col5 = st.columns(5)
-    
-    with col3:
-        if st.button("➕ Add"):
+    # Expense Details with action icons beside
+    cols = st.columns([4, 1, 1, 1])  # Adjust width ratio as needed
+    with cols[0]:
+        st.markdown("### Expense Details")
+    with cols[1]:
+        if st.button("📊"):
+            st.session_state.current_screen = "heatmap_view"
+            st.rerun()
+    with cols[2]:
+        if st.button("➕"):
             st.session_state.current_screen = "add_expense"
             st.rerun()
-    
-    with col2:
-        if st.button("✏️ Edit"):
-            st.session_state.current_screen = "edit_expense"
+    with cols[3]:
+        if st.button("🔄"):
             st.rerun()
 
-    with col4:
-        if st.button("🗑️ Delete"):
-            st.session_state.current_screen = "confirm_delete"
-            st.rerun()
-
-    with col1:
-        if st.button("📊 Chart"):
-            st.session_state.current_screen = "heatmap_view"
-            st.rerun()    
-
-    with col5:
-        if st.button("🔄 Refresh"):
-            st.rerun()  
 
     # Display the expenses DataFrame with expense ID included and no index column 
     if not expenses_df.empty:
-         st.write("### Expense Details")
 
     for i, row in expenses_df.iterrows():
         cols = st.columns([1, 2, 1, 2, 2, 1, 1])  # Adjust widths as needed
