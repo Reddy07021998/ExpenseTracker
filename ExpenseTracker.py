@@ -437,26 +437,27 @@ elif st.session_state.current_screen == "heatmap_view":
 
     with col1:
             # Month Names Dropdown (Jan, Feb, etc.)
-            month_names = ["All", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-            month = st.selectbox("Select Month", month_names)
-        
-            # Determine month number from selected month
+            month_names = ["All", "Jan", "Feb", "Mar", "Apr", "May", "Jun", 
+                           "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+            current_month_index = datetime.now().month
+            month = st.selectbox("Select Month", month_names, index=current_month_index)
             month_num = None if month == "All" else month_names.index(month)
-            
+                        
     with col2:
             # Category Dropdown
-            category = st.selectbox("Select Category", ["All"] + category_names)
-
-            # Determine category ID from category name
-            category_id = None if category == "All" else categories_df[categories_df['category_name'] == category]['category_id'].values[0]
+            category_options = ["All"] + categories_df['category_name'].tolist()
+            category = st.selectbox("Select Category", category_options)
+            category_id = None if category == "All" else int(categories_df[categories_df['category_name'] == category]['category_id'].values[0])
 
     with col3:
             # Year Dropdown
-            year = st.selectbox("Select Year", ["All", 2023, 2024])
-
-            # Determine year from selected year
-            year_num = None if year == "All" else int(year)        
-            
+            current_year = datetime.now().year
+            year_range = list(range(2022, current_year + 2))
+            year_options = ["All"] + year_range
+            default_year_index = year_options.index(current_year)
+            year = st.selectbox("Select Year", year_options, index=default_year_index)
+            year_num = None if year == "All" else int(year)       
+                        
     try:
         # Fetch expenses data with filters applied (month, year, category)
         expenses_df = run_async(fetch_expenses(
