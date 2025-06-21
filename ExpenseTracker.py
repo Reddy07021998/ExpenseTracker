@@ -188,15 +188,15 @@ async def fetch_expenses(user_id, month_num=None, year=None, category_id=None, o
       df = pd.DataFrame(cleaned_data)
 
       # Rename columns
-      df.columns = [  'Expense Name', 'Amount', 'Expense Date', 'Category']
+      df.columns = ['Expense ID', 'Expense Name', 'Amount', 'Expense Date', 'Category']
 
       return df
     else:
-      return pd.DataFrame(columns=[  'Expense Name', 'Amount', 'Expense Date', 'Category'])
+      return pd.DataFrame(columns=['Expense ID','Expense Name', 'Amount', 'Expense Date', 'Category'])
 
   except Exception as e:
     st.error(f"Error fetching expenses: {e}")
-    return pd.DataFrame(columns=[  'Expense Name', 'Amount', 'Expense Date', 'Category'])
+    return pd.DataFrame(columns=['Expense ID','Expense Name', 'Amount', 'Expense Date', 'Category'])
       
 # Function to update an expense based on expense_id and user_id
 async def update_expense(expense_id, user_id, expense_name, amount, expense_date, category_id):
