@@ -367,7 +367,7 @@ elif st.session_state.current_screen == "main_menu":
         limit=st.session_state.page_limit))
 
     # Expense Details with action icons beside
-    cols = st.columns([4, 1, 1, 1])  # Adjust width ratio as needed
+    cols = st.columns([2, 1, 1, 1])  # Adjust width ratio as needed
     with cols[0]:
         st.markdown("### Expense Details")
     with cols[1]:
