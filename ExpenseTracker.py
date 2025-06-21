@@ -393,17 +393,19 @@ elif st.session_state.current_screen == "main_menu":
 
         if isinstance(selected_rows, list) and len(selected_rows) > 0:
             selected = selected_rows[0]
+            st.write("Selected Row Keys:", selected.keys())  # Debug line
+
             selected_expense = {
-                "Expense ID": selected.get("Expense ID"),
-                "Expense Name": selected.get("Expense Name"),
-                "Amount": selected.get("Amount"),
-                "Expense Date": selected.get("Expense Date"),
-                "Category": selected.get("Category")
+                "Expense ID": selected.get("Expense ID") or selected.get("expense_id"),
+                "Expense Name": selected.get("Expense Name") or selected.get("expense_name"),
+                "Amount": selected.get("Amount") or selected.get("amount"),
+                "Expense Date": selected.get("Expense Date") or selected.get("expense_date"),
+                "Category": selected.get("Category") or selected.get("category")
             }
-        
+
             st.markdown("### 🎯 Selected Expense")
             st.write(selected_expense)
-        
+
             col1, col2 = st.columns(2)
             with col1:
                 if st.button("✏️ Edit Selected"):
@@ -416,6 +418,7 @@ elif st.session_state.current_screen == "main_menu":
                     st.rerun()
         else:
             st.info("Select an expense to edit or delete.")
+
 
     if st.button("Logout"):
         st.session_state.user_id = None
