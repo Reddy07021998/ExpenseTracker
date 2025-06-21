@@ -13,8 +13,8 @@ import plotly
 
 
 # Initialize Supabase client
-supabaseUrl = 'https://gippopxafisxpvrkkplt.supabase.co'
-supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpcHBvcHhhZmlzeHB2cmtrcGx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI1MjM1MTcsImV4cCI6MjA0ODA5OTUxN30.ldQh7QxpG08pERpOKl_-3gGr8CTYdPKGx83dDYJe5ZM"  # Ensure your environment variable is set
+supabaseUrl = 'https://ofvcxjmgynwzngobgamv.supabase.co'
+supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9mdmN4am1neW53em5nb2JnYW12Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0OTI1OTEsImV4cCI6MjA2NjA2ODU5MX0.9Pb0Q9n0nG9QtyZSW8RKCFCL1fPOsEWrRgvsfgPxSnk"  # Ensure your environment variable is set
 supabase: Client = create_client(supabaseUrl, supabaseKey)
 
 # Assuming your logo is in the same directory as your script
