@@ -315,11 +315,6 @@ elif st.session_state.current_screen == "register":
 # Main Menu Screen
 elif st.session_state.current_screen == "main_menu":
     st.title("Expense Tracker Dashboard")
-    # Initialize pagination state variables if they don't exist
-    if 'page_offset' not in st.session_state:
-        st.session_state.page_offset = 0  # Initialize offset for pagination
-    if 'page_limit' not in st.session_state:
-        st.session_state.page_limit = 10  # Records per page
 
     categories_df = run_async(fetch_categories())
 
@@ -327,131 +322,93 @@ elif st.session_state.current_screen == "main_menu":
         st.write("No categories available.")
     else:
         category_names = categories_df['category_name'].tolist()
-    
-    # Display the icons for Add, Edit, and Delete actions    # Display the icons for Add, Edit, and Delete actions
+
     col11, col12, col13 = st.columns(3)
 
     with col11:
-            # Month Names Dropdown (Jan, Feb, etc.)
-            month_names = ["All", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-            month = st.selectbox("Select Month", month_names)
-        
-            # Determine month number from selected month
-            month_num = None if month == "All" else month_names.index(month)
-            
-    with col12:
-            # Category Dropdown
-            category = st.selectbox("Select Category", ["All"] + category_names)
+        month_names = ["All", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+        month = st.selectbox("Select Month", month_names)
+        month_num = None if month == "All" else month_names.index(month)
 
-            # Determine category ID from category name
-            category_id = None if category == "All" else categories_df[categories_df['category_name'] == category]['category_id'].values[0]
+    with col12:
+        category = st.selectbox("Select Category", ["All"] + category_names)
+        category_id = None if category == "All" else categories_df[categories_df['category_name'] == category]['category_id'].values[0]
 
     with col13:
-            from datetime import datetime
+        current_year = datetime.now().year
+        year_range = list(range(2022, current_year + 2))
+        year_options = ["All"] + year_range
+        year = st.selectbox("Select Year", year_options)
+        year_num = None if year == "All" else int(year)
 
-            current_year = datetime.now().year
-            year_range = list(range(2022, current_year + 2))  # adjust start year if needed
-            year_options = ["All"] + year_range
-            default_year_index = year_options.index(current_year)
-            
-            year = st.selectbox("Select Year", year_options)
-            year_num = None if year == "All" else int(year)
-
-
-    # Fetch expenses with filters and pagination
+    # ✅ Fetch all expenses (no offset/limit)
     expenses_df = run_async(fetch_expenses(
         st.session_state.user_id,
         month_num=month_num,
         year=year_num,
-        category_id=category_id,
-        offset=st.session_state.page_offset,
-        limit=st.session_state.page_limit))
+        category_id=category_id
+    ))
 
-    # Expense Details with action icons beside
+    # Actions
     col1, col2, col3 = st.columns([1, 1, 1])
-
     with col1:
         if st.button("➕ Add Expense"):
             st.session_state.current_screen = "add_expense"
             st.rerun()
-    
     with col2:
         if st.button("🔄 Refresh"):
             st.rerun()
-    
     with col3:
         if st.button("📊 Chart View"):
             st.session_state.current_screen = "heatmap_view"
             st.rerun()
 
+    # ✅ AgGrid Display
     if not expenses_df.empty:
         st.subheader("💸 Expense Details")
-        
-        # Allow user to set how many rows to display per page
+
         page_size = st.selectbox("Rows per page", [10, 20, 30, 50, 100], index=0)
-        
-        if not expenses_df.empty:
-            gb = GridOptionsBuilder.from_dataframe(expenses_df)
-            gb.configure_pagination(paginationAutoPageSize=False, paginationPageSize=page_size)
-            gb.configure_default_column(editable=False, groupable=True)
-            gb.configure_selection('single', use_checkbox=True)
-            gb.configure_column("Expense Name", editable=False)
-            gb.configure_column("Amount", editable=False)
-            gb.configure_column("Expense Date", editable=False)
-            gb.configure_column("Category", editable=False)
-        
-            grid_options = gb.build()
-        
-            grid_response = AgGrid(
-                expenses_df,
-                gridOptions=grid_options,
-                update_mode=GridUpdateMode.SELECTION_CHANGED,
-                data_return_mode=DataReturnMode.FILTERED_AND_SORTED,
-                fit_columns_on_grid_load=True,
-                height=400,
-                width='100%'
-            )
-        
-            selected_rows = grid_response.get("selected_rows", [])
-            
-            # Action Buttons
-            if selected_rows:
-                selected = selected_rows[0]  # safely access the first selected row
-        
-                st.markdown("### 🎯 Selected Expense")
-                st.write(selected)
-        
-                col1, col2 = st.columns([1, 1])
-                with col1:
-                    if st.button("✏️ Edit Selected"):
-                        st.session_state.editing_expense = selected
-                        st.session_state.current_screen = "inline_edit"
-                        st.rerun()
-                with col2:
-                    if st.button("🗑️ Delete Selected"):
-                        run_async(delete_expense(int(selected.get('Expense ID'))))
-                        st.rerun()
-        else:
-            st.info("No expenses found with the selected filters.")
 
+        gb = GridOptionsBuilder.from_dataframe(expenses_df)
+        gb.configure_pagination(paginationAutoPageSize=False, paginationPageSize=page_size)
+        gb.configure_default_column(editable=False, groupable=True)
+        gb.configure_selection('single', use_checkbox=True)
 
-    # Pagination: Back and Next buttons 
-    col1, col2 = st.columns([1, 1]) 
+        grid_options = gb.build()
 
-    with col1: 
-        if (st.button("← Back") and 
-                (st.session_state.page_offset > 0)): 
-            # Go to previous page 
-            st.session_state.page_offset -= (st.session_state.page_limit) 
+        grid_response = AgGrid(
+            expenses_df,
+            gridOptions=grid_options,
+            update_mode=GridUpdateMode.SELECTION_CHANGED,
+            data_return_mode=DataReturnMode.FILTERED_AND_SORTED,
+            fit_columns_on_grid_load=True,
+            height=400,
+            width='100%'
+        )
 
-    with col2:
-        if (st.button("Next →")): 
-            # Go to next page 
-            st.session_state.page_offset += (st.session_state.page_limit)
+        selected_rows = grid_response.get("selected_rows", [])
 
-    if st.button("Logout"): 
-        st.session_state.user_id = None  
-        st.session_state.current_screen = "login"  
+        if selected_rows:
+            selected = selected_rows[0]
+            st.markdown("### 🎯 Selected Expense")
+            st.write(selected)
+
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("✏️ Edit Selected"):
+                    st.session_state.editing_expense = selected
+                    st.session_state.current_screen = "inline_edit"
+                    st.rerun()
+            with col2:
+                if st.button("🗑️ Delete Selected"):
+                    run_async(delete_expense(int(selected.get('Expense ID'))))
+                    st.rerun()
+    else:
+        st.info("No expenses found with the selected filters.")
+
+    if st.button("Logout"):
+        st.session_state.user_id = None
+        st.session_state.current_screen = "login"
         st.rerun()
  
 # Heatmap Screen
