@@ -426,9 +426,6 @@ elif st.session_state.current_screen == "main_menu":
                 run_async(delete_expense(row['Expense ID']))
                 st.rerun()
 
-    else: 
-        st.write("No expenses found based on the selected filters.")
-
     # Pagination: Back and Next buttons 
     col1, col2 = st.columns([1, 1]) 
 
