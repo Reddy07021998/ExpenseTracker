@@ -323,7 +323,7 @@ elif st.session_state.current_screen == "main_menu":
     else:
         category_names = categories_df['category_name'].tolist()
 
-    col11, col12, col13 = st.columns(3)
+    col11, col12, col13 = st.columns([1,1,1])
 
     with col11:
         month_names = ["All", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
