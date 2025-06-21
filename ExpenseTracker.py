@@ -346,12 +346,15 @@ elif st.session_state.current_screen == "main_menu":
             category_id = None if category == "All" else categories_df[categories_df['category_name'] == category]['category_id'].values[0]
 
     with col13:
+            from datetime import datetime
+
             current_year = datetime.now().year
-            year_range = list(range(2022, current_year + 2))  # Adjust starting year as needed
+            year_range = list(range(2022, current_year + 2))  # adjust start year if needed
             year_options = ["All"] + year_range
             default_year_index = year_options.index(current_year)
-
+            
             year = st.selectbox("Select Year", year_options, index=default_year_index)
+            year_num = None if year == "All" else int(year)
 
 
     # Fetch expenses with filters and pagination
