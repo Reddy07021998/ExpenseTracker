@@ -671,8 +671,7 @@ elif st.session_state.current_screen == "inline_delete":
         
     if  row:
         run_async(delete_expense(row['Expense ID']))
-        st.session_state.current_screen = "main_menu"
-        st.rerun()
+        st.session_state.current_screen = "main_menu"        
 
     # Fetch expenses to populate a dropdown of expense IDs
     try:
