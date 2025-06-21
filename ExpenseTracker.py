@@ -372,7 +372,7 @@ elif st.session_state.current_screen == "main_menu":
         #gb = GridOptionsBuilder.from_dataframe(expenses_df)
         #gb.configure_pagination(paginationAutoPageSize=False, paginationPageSize=page_size)
         #gb.configure_default_column(editable=False, groupable=True)
-        #gb.configure_selection('single', use_checkbox=True)
+        #gb.configure_selection('single', use_checkbox=True) 
 
         gb = GridOptionsBuilder.from_dataframe(expenses_df)
         gb.configure_pagination(paginationAutoPageSize=False, paginationPageSize=page_size)
