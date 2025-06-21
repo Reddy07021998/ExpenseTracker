@@ -367,7 +367,7 @@ elif st.session_state.current_screen == "main_menu":
     if not expenses_df.empty:
         st.subheader("💸 Expense Details")
 
-        page_size = st.selectbox("Rows per page", [10, 20, 30, 50, 100], index=0)
+        page_size = 10 #st.selectbox("Rows per page", [10, 20, 30, 50, 100], index=0)
 
         gb = GridOptionsBuilder.from_dataframe(expenses_df)
         gb.configure_pagination(paginationAutoPageSize=False, paginationPageSize=page_size)
