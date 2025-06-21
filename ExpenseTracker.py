@@ -475,34 +475,6 @@ elif st.session_state.current_screen == "heatmap_view":
         if "edited_df" not in st.session_state:
             st.session_state.edited_df = expenses_df.copy()
         
-        # Display the DataFrame with clickable cells
-        st.write("### Expense Table")
-        for row_idx, row in st.session_state.edited_df.iterrows():
-            cols = st.columns(len(row))
-            for col_idx, (col_name, value) in enumerate(row.items()):
-                with cols[col_idx]:
-                    if st.button(f"{value}", key=f"cell_{row_idx}_{col_idx}"):
-                        st.session_state.cell_to_edit = (row_idx, col_name)
-        
-        # Check if a cell is clicked for editing
-        if st.session_state.cell_to_edit is not None:
-            row_idx, col_name = st.session_state.cell_to_edit
-        
-            # Modal-like popup for editing
-            with st.container():
-                st.write(f"### Edit Value in Row {row_idx + 1}, Column '{col_name}'")
-                new_value = st.text_input(f"New value for '{col_name}'", value=str(st.session_state.edited_df.at[row_idx, col_name]))
-                if st.button("Save"):
-                    # Update the value in the DataFrame
-                    st.session_state.edited_df.at[row_idx, col_name] = new_value
-                    st.session_state.cell_to_edit = None
-                if st.button("Cancel"):
-                    st.session_state.cell_to_edit = None
-        
-        # Display the updated DataFrame
-        st.write("### Updated Expense Table")
-        st.dataframe(st.session_state.edited_df)
-
         if not expenses_df.empty:
             # Debugging: Print or log filtered data
             st.write("Filtered Expenses Data:")
