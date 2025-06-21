@@ -323,7 +323,6 @@ elif st.session_state.current_screen == "main_menu":
                border-radius: 10px;
                font-size: 36px;
                font-family: "Verdana", sans-serif;
-               text-shadow: 0 0 5px #00ffcc;
                margin-top: 10px;
                margin-bottom: 10px;'>
         💼 Expense Tracker Dashboard
