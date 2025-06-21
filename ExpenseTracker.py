@@ -668,19 +668,9 @@ elif st.session_state.current_screen == "inline_delete":
         st.error("No expense selected for deletion.")
         st.session_state.current_screen = "main_menu"
         st.rerun()
-
-    st.write("### Confirm Deletion")
-    st.write(f"**Name:** {row['Expense Name']}")
-    st.write(f"**Amount:** ₹{row['Amount']}")
-    st.write(f"**Date:** {row['Expense Date']}")
-    st.write(f"**Category:** {row['Category']}")
-
-    if st.button("Confirm Delete"):
+        
+    if  row:
         run_async(delete_expense(row['Expense ID']))
-        st.session_state.current_screen = "main_menu"
-        st.rerun()
-
-    if st.button("Cancel"):
         st.session_state.current_screen = "main_menu"
         st.rerun()
 
