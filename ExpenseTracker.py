@@ -388,11 +388,13 @@ elif st.session_state.current_screen == "main_menu":
 
         selected_rows = grid_response.get("selected_rows", [])
 
-        if selected_rows:
+        # ✅ Safely check for selection
+        if selected_rows is not None and len(selected_rows) > 0:
             selected = selected_rows[0]
+        
             st.markdown("### 🎯 Selected Expense")
             st.write(selected)
-
+        
             col1, col2 = st.columns(2)
             with col1:
                 if st.button("✏️ Edit Selected"):
