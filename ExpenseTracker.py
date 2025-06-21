@@ -367,7 +367,7 @@ elif st.session_state.current_screen == "main_menu":
         limit=st.session_state.page_limit))
 
     # Expense Details with action icons beside
-    cols = st.columns([2, 1, 1, 1])  # Adjust width ratio as needed
+    cols = st.columns([2, .25, .25, .25])  # Adjust width ratio as needed
     with cols[0]:
         st.markdown("### Expense Details")
     with cols[1]:
@@ -387,10 +387,7 @@ elif st.session_state.current_screen == "main_menu":
     if not expenses_df.empty:
 
         for i, row in expenses_df.iterrows():
-            cols = st.columns([1, 2, 1, 2, 2, 1, 1])  # Adjust widths as needed
-    
-            with cols[0]:
-                st.write(row['Expense ID'])
+            cols = st.columns([ 2, .5, 2, 1.5, .25, .25])  # Adjust widths as needed
     
             with cols[1]:
                 st.write(row['Expense Name'])
