@@ -618,7 +618,7 @@ elif st.session_state.current_screen == "inline_delete":
         st.session_state.current_screen = "main_menu"        
         st.rerun()
         
-         if st.button("Cancel"):
+     if st.button("Cancel"):
         st.session_state.current_screen = "main_menu"
         st.rerun()
                 
