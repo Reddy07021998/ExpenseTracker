@@ -388,10 +388,9 @@ elif st.session_state.current_screen == "main_menu":
 
         selected_rows = grid_response.get("selected_rows", [])
 
-        if selected_rows:
+        if isinstance(selected_rows, list) and len(selected_rows) > 0:
             selected = selected_rows[0]
-            
-            # ✅ Normalize keys - map them to match your display keys
+        
             selected_expense = {
                 "Expense ID": selected.get("expense_id"),
                 "Expense Name": selected.get("expense_name"),
