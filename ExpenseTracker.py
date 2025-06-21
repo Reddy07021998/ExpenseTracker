@@ -387,30 +387,31 @@ elif st.session_state.current_screen == "main_menu":
     if not expenses_df.empty:
 
         for i, row in expenses_df.iterrows():
-            cols = st.columns([ 2, .5, 2, 1.5, .25, .25])  # Adjust widths as needed
-    
-            with cols[1]:
+            cols = st.columns([2, 2, 1, 2, 1, 1])  # removed the 1st column for Expense ID
+        
+            with cols[0]:
                 st.write(row['Expense Name'])
-    
-            with cols[2]:
+        
+            with cols[1]:
                 st.write(f"₹{row['Amount']}")
-    
-            with cols[3]:
+        
+            with cols[2]:
                 st.write(row['Expense Date'])
-    
-            with cols[4]:
+        
+            with cols[3]:
                 st.write(row['Category'])
-    
-            with cols[5]:
+        
+            with cols[4]:
                 if st.button("✏️", key=f"edit_{row['Expense ID']}"):
                     st.session_state.editing_expense = row.to_dict()
                     st.session_state.current_screen = "inline_edit"
                     st.rerun()
-    
-            with cols[6]:
+        
+            with cols[5]:
                 if st.button("🗑️", key=f"delete_{row['Expense ID']}"):
                     run_async(delete_expense(row['Expense ID']))
                     st.rerun()
+
     if  expenses_df.empty:
          st.write("No Expense Details Found")
 
