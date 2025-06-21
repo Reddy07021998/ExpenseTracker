@@ -395,7 +395,7 @@ elif st.session_state.current_screen == "main_menu":
 
     # Display the expenses DataFrame with expense ID included and no index column 
     if not expenses_df.empty:
-    st.write("### Expense Details")
+         st.write("### Expense Details")
 
     for i, row in expenses_df.iterrows():
         cols = st.columns([1, 2, 1, 2, 2, 1, 1])  # Adjust widths as needed
