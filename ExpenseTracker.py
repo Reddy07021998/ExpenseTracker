@@ -387,7 +387,7 @@ elif st.session_state.current_screen == "main_menu":
     if not expenses_df.empty:
 
         for i, row in expenses_df.iterrows():
-            cols = st.columns([1, .5, 1, 1, .5, .5])  # removed the 1st column for Expense ID
+            cols = st.columns([1, .5, .5, .5, .25, .25])  # removed the 1st column for Expense ID
         
             with cols[0]:
                 st.write(row['Expense Name'])
