@@ -425,6 +425,8 @@ elif st.session_state.current_screen == "main_menu":
             if st.button("🗑️", key=f"delete_{row['Expense ID']}"):
                 run_async(delete_expense(row['Expense ID']))
                 st.rerun()
+    if  expenses_df.empty:
+         st.write("No Expense Details Found")
 
     # Pagination: Back and Next buttons 
     col1, col2 = st.columns([1, 1]) 
