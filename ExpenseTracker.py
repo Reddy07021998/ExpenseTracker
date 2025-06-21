@@ -10,7 +10,7 @@ import numpy as np
 import logging
 import matplotlib
 import plotly
-
+from datetime import datetime
 
 # Initialize Supabase client
 supabaseUrl = 'https://ofvcxjmgynwzngobgamv.supabase.co'
@@ -347,7 +347,13 @@ elif st.session_state.current_screen == "main_menu":
 
     with col13:
             # Year Dropdown
-            year = st.selectbox("Select Year", ["All", 2023, 2024])
+            current_year = datetime.now().year
+            year_options = ["All", 2023, 2024]  # Add more years if needed
+
+            # Default index should match current year
+            default_year_index = year_options.index(current_year) if current_year in year_options else 0
+
+            year = st.selectbox("Select Year", year_options, index=default_year_index)
 
             # Determine year from selected year
             year_num = None if year == "All" else int(year)  
