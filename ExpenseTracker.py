@@ -394,9 +394,38 @@ elif st.session_state.current_screen == "main_menu":
             st.rerun()  
 
     # Display the expenses DataFrame with expense ID included and no index column 
-    if not expenses_df.empty: 
-        st.write("### Expense Details") 
-        st.dataframe(expenses_df) 
+    if not expenses_df.empty:
+    st.write("### Expense Details")
+
+    for i, row in expenses_df.iterrows():
+        cols = st.columns([1, 2, 1, 2, 2, 1, 1])  # Adjust widths as needed
+
+        with cols[0]:
+            st.write(row['Expense ID'])
+
+        with cols[1]:
+            st.write(row['Expense Name'])
+
+        with cols[2]:
+            st.write(f"₹{row['Amount']}")
+
+        with cols[3]:
+            st.write(row['Expense Date'])
+
+        with cols[4]:
+            st.write(row['Category'])
+
+        with cols[5]:
+            if st.button("✏️", key=f"edit_{row['Expense ID']}"):
+                st.session_state.editing_expense = row.to_dict()
+                st.session_state.current_screen = "inline_edit"
+                st.rerun()
+
+        with cols[6]:
+            if st.button("🗑️", key=f"delete_{row['Expense ID']}"):
+                st.session_state.deleting_expense = row.to_dict()
+                st.session_state.current_screen = "inline_delete"
+                st.rerun()
     else: 
         st.write("No expenses found based on the selected filters.")
 
@@ -548,10 +577,39 @@ elif st.session_state.current_screen == "add_expense":
             st.session_state.current_screen = "main_menu"
             st.rerun()
 
-
-        
-elif st.session_state.current_screen == "edit_expense":
+elif st.session_state.current_screen == "inline_edit":
     st.title("Edit Expense")
+
+    row = st.session_state.editing_expense
+    if not row:
+        st.error("No expense selected for editing.")
+        st.session_state.current_screen = "main_menu"
+        st.rerun()
+
+    expense_name = st.text_input("Expense Name", row['Expense Name'])
+    amount = st.number_input("Amount", min_value=0.01, step=0.01, value=float(row['Amount']))
+    expense_date = st.date_input("Expense Date", pd.to_datetime(row['Expense Date']))
+
+    categories_df = run_async(fetch_categories())
+    category_names = categories_df['category_name'].tolist()
+    category = st.selectbox("Category", category_names, index=category_names.index(row['Category']))
+    category_id = categories_df[categories_df['category_name'] == category]['category_id'].values[0]
+
+    if st.button("Save Changes"):
+        run_async(update_expense(
+            row['Expense ID'],
+            st.session_state.user_id,
+            expense_name,
+            amount,
+            expense_date,
+            category_id
+        ))
+        st.session_state.current_screen = "main_menu"
+        st.rerun()
+
+    if st.button("Cancel"):
+        st.session_state.current_screen = "main_menu"
+        st.rerun()
 
     # Fetch expenses for the user
     expenses_df = run_async(fetch_expenses(st.session_state.user_id))
@@ -602,8 +660,29 @@ elif st.session_state.current_screen == "edit_expense":
             st.rerun()
 
 # Delete Expense Screen
-elif st.session_state.current_screen == "confirm_delete":
+elif st.session_state.current_screen == "inline_delete":
     st.title("Delete Expense")
+
+    row = st.session_state.deleting_expense
+    if not row:
+        st.error("No expense selected for deletion.")
+        st.session_state.current_screen = "main_menu"
+        st.rerun()
+
+    st.write("### Confirm Deletion")
+    st.write(f"**Name:** {row['Expense Name']}")
+    st.write(f"**Amount:** ₹{row['Amount']}")
+    st.write(f"**Date:** {row['Expense Date']}")
+    st.write(f"**Category:** {row['Category']}")
+
+    if st.button("Confirm Delete"):
+        run_async(delete_expense(row['Expense ID']))
+        st.session_state.current_screen = "main_menu"
+        st.rerun()
+
+    if st.button("Cancel"):
+        st.session_state.current_screen = "main_menu"
+        st.rerun()
 
     # Fetch expenses to populate a dropdown of expense IDs
     try:
