@@ -15,7 +15,7 @@ from datetime import datetime
 # Initialize Supabase client
 supabaseUrl = 'https://ofvcxjmgynwzngobgamv.supabase.co'
 supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9mdmN4am1neW53em5nb2JnYW12Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0OTI1OTEsImV4cCI6MjA2NjA2ODU5MX0.9Pb0Q9n0nG9QtyZSW8RKCFCL1fPOsEWrRgvsfgPxSnk"  # Ensure your environment variable is set
-supabase: Client = create_client(supabaseUrl, supabaseKey)
+supabase: Client = create_client(supabaseUrl, supabaseKey) 
 
 # Assuming your logo is in the same directory as your script
 login_img = "https://img.freepik.com/premium-photo/top-view-stylish-workspace-with-laptop-computer-coffee-cup-notebook-copy-space_35674-5781.jpg?ga=GA1.1.1158903708.1732594736&semt=ais_hybrid"
@@ -387,7 +387,7 @@ elif st.session_state.current_screen == "main_menu":
     if not expenses_df.empty:
 
         for i, row in expenses_df.iterrows():
-            cols = st.columns([1.5, 1, 1.5, 1.5, .5, .5])  # removed the 1st column for Expense ID
+            cols = st.columns([1, .5, 1, 1, .5, .5])  # removed the 1st column for Expense ID
         
             with cols[0]:
                 st.write(row['Expense Name'])
