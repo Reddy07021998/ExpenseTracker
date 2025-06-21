@@ -390,7 +390,7 @@ elif st.session_state.current_screen == "main_menu":
 
         selected_rows = grid_response.get("selected_rows", [])
 
-        if isinstance(selected_rows, list) and len(selected_rows) > 0:
+        if len(selected_rows) > 0:
             selected = selected_rows[0]
             selected_expense = {
                 "Expense ID": selected.get("Expense ID"),
