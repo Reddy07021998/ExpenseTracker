@@ -509,6 +509,33 @@ elif st.session_state.current_screen == "heatmap_view":
         else:
             st.write("No data available to generate visualizations.")
 
+        if not expenses_df.empty:
+            # 🔥 Heatmap
+            st.markdown("### 🔥 Daily Spending Heatmap")
+            heatmap_data = expenses_df.groupby(['Expense Date', 'Category'])['Amount'].sum().unstack(fill_value=0)
+            plt.figure(figsize=(10, 6))
+            sns.heatmap(heatmap_data, annot=True, cmap="YlGnBu", fmt='.2f')
+            st.pyplot(plt)
+
+            # 🥧 Pie Chart
+            st.markdown("### 🥧 Spending Breakdown by Category")
+
+            category_summary = expenses_df.groupby("Category")["Amount"].sum().reset_index()
+            category_summary = category_summary.sort_values(by="Amount", ascending=False)
+
+            import plotly.express as px
+            fig = px.pie(category_summary,
+                        values="Amount",
+                        names="Category",
+                        title="Spending by Category",
+                        color_discrete_sequence=px.colors.qualitative.Set3,
+                        hole=0.4)
+
+            st.plotly_chart(fig, use_container_width=True)
+
+        else:
+            st.warning("No data available to generate visualizations.")
+
     except Exception as e:
         st.error(f"Error generating visualizations: {e}")
 
