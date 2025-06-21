@@ -346,17 +346,13 @@ elif st.session_state.current_screen == "main_menu":
             category_id = None if category == "All" else categories_df[categories_df['category_name'] == category]['category_id'].values[0]
 
     with col13:
-            # Year Dropdown
             current_year = datetime.now().year
-            year_options = ["All", 2023, 2024]  # Add more years if needed
-
-            # Default index should match current year
-            default_year_index = year_options.index(current_year) if current_year in year_options else 0
+            year_range = list(range(2022, current_year + 2))  # Adjust starting year as needed
+            year_options = ["All"] + year_range
+            default_year_index = year_options.index(current_year)
 
             year = st.selectbox("Select Year", year_options, index=default_year_index)
 
-            # Determine year from selected year
-            year_num = None if year == "All" else int(year)  
 
     # Fetch expenses with filters and pagination
     expenses_df = run_async(fetch_expenses(
