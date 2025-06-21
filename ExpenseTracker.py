@@ -350,7 +350,7 @@ elif st.session_state.current_screen == "main_menu":
     ))
 
     # Actions
-    col1, col2, col3 = st.columns([1, 1, 1])
+    col1, col2, col3 = st.columns([.5, .5, .5])
     with col1:
         if st.button("➕ Add Expense"):
             st.session_state.current_screen = "add_expense"
