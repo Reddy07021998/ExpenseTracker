@@ -388,8 +388,6 @@ elif st.session_state.current_screen == "main_menu":
 
         selected_rows = grid_response.get("selected_rows", [])
 
-        selected_rows = grid_response.get("selected_rows", [])
-
         if selected_rows:
             selected = selected_rows[0]
             
