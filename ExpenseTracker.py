@@ -388,33 +388,35 @@ elif st.session_state.current_screen == "main_menu":
 
         selected_rows = grid_response.get("selected_rows", [])
 
-        selected = selected_rows[0]
-        
-        # ✅ Normalize keys - map them to match your display keys
-        selected_expense = {
-            "Expense ID": selected.get("expense_id"),
-            "Expense Name": selected.get("expense_name"),
-            "Amount": selected.get("amount"),
-            "Expense Date": selected.get("expense_date"),
-            "Category": selected.get("category")
-        }
-        
-        st.markdown("### 🎯 Selected Expense")
-        st.write(selected_expense)
-        
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("✏️ Edit Selected"):
-                st.session_state.editing_expense = selected_expense
-                st.session_state.current_screen = "inline_edit"
-                st.rerun()
-        with col2:
-            if st.button("🗑️ Delete Selected"):
-                run_async(delete_expense(int(selected_expense["Expense ID"])))
-                st.rerun()
+        selected_rows = grid_response.get("selected_rows", [])
 
-    else:
-        st.info("No expenses found with the selected filters.")
+        if selected_rows:
+            selected = selected_rows[0]
+            
+            # ✅ Normalize keys - map them to match your display keys
+            selected_expense = {
+                "Expense ID": selected.get("expense_id"),
+                "Expense Name": selected.get("expense_name"),
+                "Amount": selected.get("amount"),
+                "Expense Date": selected.get("expense_date"),
+                "Category": selected.get("category")
+            }
+        
+            st.markdown("### 🎯 Selected Expense")
+            st.write(selected_expense)
+        
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("✏️ Edit Selected"):
+                    st.session_state.editing_expense = selected_expense
+                    st.session_state.current_screen = "inline_edit"
+                    st.rerun()
+            with col2:
+                if st.button("🗑️ Delete Selected"):
+                    run_async(delete_expense(int(selected_expense["Expense ID"])))
+                    st.rerun()
+        else:
+            st.info("Select an expense to edit or delete.")
 
     if st.button("Logout"):
         st.session_state.user_id = None
