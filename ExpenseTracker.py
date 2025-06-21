@@ -12,7 +12,6 @@ import matplotlib
 import plotly
 from datetime import datetime
 from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode, DataReturnMode
-from st_aggrid.shared import JsCode
 
 # Initialize Supabase client
 supabaseUrl = 'https://ofvcxjmgynwzngobgamv.supabase.co'
@@ -368,42 +367,36 @@ elif st.session_state.current_screen == "main_menu":
     if not expenses_df.empty:
         st.subheader("💸 Expense Details")
 
-        page_size = 10
+        page_size = 10  # You can allow user selection if needed
 
-        # Add a placeholder 'Delete' column for button rendering
-        expenses_df["Delete"] = ""  # This will be used to render buttons
+        # ✅ Ensure 'Expense Date' is in datetime format
+        if not pd.api.types.is_datetime64_any_dtype(expenses_df["Expense Date"]):
+            expenses_df["Expense Date"] = pd.to_datetime(expenses_df["Expense Date"])
 
-        # JavaScript code to render Delete button
-        delete_button = JsCode('''
-            function(params) {
-                return `<button style="background-color:red;color:white;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;">Delete</button>`;
-            }
-        ''')
-
+        # ✅ Build grid options with filters
         gb = GridOptionsBuilder.from_dataframe(expenses_df)
         gb.configure_pagination(paginationAutoPageSize=False, paginationPageSize=page_size)
         gb.configure_default_column(editable=True, groupable=True)
         gb.configure_selection('single', use_checkbox=True)
+
         gb.configure_column("Expense Name", editable=True)
         gb.configure_column("Amount", editable=True)
-        gb.configure_column("Expense Date", editable=True)
-        gb.configure_column("Category", editable=False)
 
-        # Configure Delete column with JS renderer
+        # ✅ Date filter with calendar
         gb.configure_column(
-            "Delete",
-            header_name="🗑️ Delete",
-            cellRenderer=delete_button,
-            editable=False,
-            filter=False,
-            sortable=False,
-            width=100
+            "Expense Date",
+            editable=True,
+            type=["dateColumnFilter", "customDateTimeFormat"],
+            custom_format_string="yyyy-MM-dd",
+            filter_params={"browserDatePicker": True}
         )
+
+        # ✅ Add filter dropdown for category
+        gb.configure_column("Category", editable=False, filter="agSetColumnFilter")
 
         grid_options = gb.build()
 
-        if not expenses_df.empty:
-            expenses_df = expenses_df.reset_index(drop=True)
+        expenses_df = expenses_df.reset_index(drop=True)
 
         grid_response = AgGrid(
             expenses_df,
@@ -412,15 +405,13 @@ elif st.session_state.current_screen == "main_menu":
             data_return_mode=DataReturnMode.FILTERED_AND_SORTED,
             fit_columns_on_grid_load=True,
             height=400,
-            width='100%',
-            allow_unsafe_jscode=True  # Enable JS in Streamlit AgGrid
+            width='100%'
         )
 
         selected_rows = grid_response.get("selected_rows", [])
 
         if isinstance(selected_rows, list) and len(selected_rows) > 0:
             selected = selected_rows[0]
-            st.write("Selected Row Keys:", selected.keys())  # Debug line
 
             selected_expense = {
                 "Expense ID": selected.get("Expense ID") or selected.get("expense_id"),
@@ -433,19 +424,16 @@ elif st.session_state.current_screen == "main_menu":
             st.markdown("### 🎯 Selected Expense")
             st.write(selected_expense)
 
-            col1, col2, col3 = st.columns(3)
+            col1, col2 = st.columns(2)
             with col1:
                 if st.button("✏️ Edit Selected"):
                     st.session_state.editing_expense = selected_expense
                     st.session_state.current_screen = "inline_edit"
                     st.rerun()
             with col2:
-                if st.button("🗑️ Confirm Delete for Selected Row"):
+                if st.button("🗑️ Delete Selected"):
                     run_async(delete_expense(int(selected_expense["Expense ID"])))
-                    st.success("Expense deleted successfully.")
                     st.rerun()
-            with col3:
-                st.info("You can also use checkboxes to select a row.")
         else:
             st.info("Select an expense to edit or delete.")
 
