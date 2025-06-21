@@ -455,7 +455,7 @@ elif st.session_state.current_screen == "heatmap_view":
             month_names = ["All", "Jan", "Feb", "Mar", "Apr", "May", "Jun", 
                            "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
             current_month_index = datetime.now().month
-            month = st.selectbox("Select Month", month_names, index=current_month_index)
+            month = st.selectbox("Select Month", month_names)
             month_num = None if month == "All" else month_names.index(month)
                         
     with col2:
