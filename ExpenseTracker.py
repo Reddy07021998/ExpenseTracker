@@ -328,7 +328,7 @@ elif st.session_state.current_screen == "main_menu":
         category_names = categories_df['category_name'].tolist()
     
     # Display the icons for Add, Edit, and Delete actions
-    col11, col12, col13 = st.columns(3)
+    cols = st.columns([1, 1, 1])  # Adjust width ratio as needed
 
     with col11:
             # Month Names Dropdown (Jan, Feb, etc.)
@@ -367,7 +367,7 @@ elif st.session_state.current_screen == "main_menu":
         limit=st.session_state.page_limit))
 
     # Expense Details with action icons beside
-    cols = st.columns([1.5, .25, .25, .25])  # Adjust width ratio as needed
+    cols = st.columns([1, .25, .25, .25])  # Adjust width ratio as needed
     with cols[0]:
         st.markdown("### Expense Details")
     with cols[1]:
