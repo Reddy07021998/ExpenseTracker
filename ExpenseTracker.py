@@ -483,7 +483,7 @@ elif st.session_state.current_screen == "heatmap_view":
             year_range = list(range(2022, current_year + 2))
             year_options = ["All"] + year_range
             default_year_index = year_options.index(current_year)
-            year = st.selectbox("Select Year", year_options, index=default_year_index)
+            year = st.selectbox("Select Year", year_options)
             year_num = None if year == "All" else int(year)       
                         
     try:
