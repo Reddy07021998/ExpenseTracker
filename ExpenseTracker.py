@@ -353,7 +353,7 @@ elif st.session_state.current_screen == "main_menu":
             year_options = ["All"] + year_range
             default_year_index = year_options.index(current_year)
             
-            year = st.selectbox("Select Year", year_options, index=default_year_index)
+            year = st.selectbox("Select Year", year_options)
             year_num = None if year == "All" else int(year)
 
 
