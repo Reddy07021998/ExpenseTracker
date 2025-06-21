@@ -385,7 +385,7 @@ elif st.session_state.current_screen == "main_menu":
         # ✅ Date filter with calendar
         gb.configure_column(
             "Expense Date",
-            editable=True,
+            editable=True,  
             type=["dateColumnFilter", "customDateTimeFormat"],
             custom_format_string="yyyy-MM-dd",
             filter_params={"browserDatePicker": True}
