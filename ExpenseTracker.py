@@ -1,7 +1,7 @@
 import os
 import bcrypt
 import streamlit as st
-import pandas as pd
+import pandas as pd 
 import seaborn as sns
 import matplotlib.pyplot as plt
 from supabase import create_client, Client
