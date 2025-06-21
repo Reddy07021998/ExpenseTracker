@@ -617,12 +617,3 @@ elif st.session_state.current_screen == "inline_delete":
         run_async(delete_expense(row['Expense ID']))
         st.session_state.current_screen = "main_menu"        
         st.rerun()
-        
-     if st.button("Cancel"):
-        st.session_state.current_screen = "main_menu"
-        st.rerun()
-                
-    if st.button("⬅️"):
-            st.session_state.current_screen = "main_menu"
-            st.rerun()
-            
