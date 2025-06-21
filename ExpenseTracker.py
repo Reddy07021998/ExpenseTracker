@@ -386,34 +386,34 @@ elif st.session_state.current_screen == "main_menu":
     # Display the expenses DataFrame with expense ID included and no index column 
     if not expenses_df.empty:
 
-    for i, row in expenses_df.iterrows():
-        cols = st.columns([1, 2, 1, 2, 2, 1, 1])  # Adjust widths as needed
-
-        with cols[0]:
-            st.write(row['Expense ID'])
-
-        with cols[1]:
-            st.write(row['Expense Name'])
-
-        with cols[2]:
-            st.write(f"₹{row['Amount']}")
-
-        with cols[3]:
-            st.write(row['Expense Date'])
-
-        with cols[4]:
-            st.write(row['Category'])
-
-        with cols[5]:
-            if st.button("✏️", key=f"edit_{row['Expense ID']}"):
-                st.session_state.editing_expense = row.to_dict()
-                st.session_state.current_screen = "inline_edit"
-                st.rerun()
-
-        with cols[6]:
-            if st.button("🗑️", key=f"delete_{row['Expense ID']}"):
-                run_async(delete_expense(row['Expense ID']))
-                st.rerun()
+        for i, row in expenses_df.iterrows():
+            cols = st.columns([1, 2, 1, 2, 2, 1, 1])  # Adjust widths as needed
+    
+            with cols[0]:
+                st.write(row['Expense ID'])
+    
+            with cols[1]:
+                st.write(row['Expense Name'])
+    
+            with cols[2]:
+                st.write(f"₹{row['Amount']}")
+    
+            with cols[3]:
+                st.write(row['Expense Date'])
+    
+            with cols[4]:
+                st.write(row['Category'])
+    
+            with cols[5]:
+                if st.button("✏️", key=f"edit_{row['Expense ID']}"):
+                    st.session_state.editing_expense = row.to_dict()
+                    st.session_state.current_screen = "inline_edit"
+                    st.rerun()
+    
+            with cols[6]:
+                if st.button("🗑️", key=f"delete_{row['Expense ID']}"):
+                    run_async(delete_expense(row['Expense ID']))
+                    st.rerun()
     if  expenses_df.empty:
          st.write("No Expense Details Found")
 
