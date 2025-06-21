@@ -315,25 +315,17 @@ elif st.session_state.current_screen == "register":
 # Main Menu Screen
 elif st.session_state.current_screen == "main_menu":
     st.markdown("""
-    <div style='
-        display: flex;
-        justify-content: center;
+    <h1 style='
+        text-align: center;
+        color: #aeefff;
+        font-size: 36px;
+        font-family: "Segoe UI", sans-serif;
+        font-weight: bold;
+        text-shadow: 0 0 6px #aeefff, 0 0 12px #aeefff;
         margin-bottom: 30px;
     '>
-        <h1 style='
-            color: #aeefff;
-            background-color: #444;
-            font-size: 36px;
-            font-family: "Segoe UI", sans-serif;
-            font-weight: bold;
-            padding: 10px 30px;
-            border-radius: 12px;
-            text-shadow: 0 0 5px #aeefff, 0 0 10px #aeefff, 0 0 15px #aeefff;
-            box-shadow: 0px 0px 12px rgba(174, 239, 255, 0.3);
-        '>
-            📊 Expense Tracker Dashboard
-        </h1>
-    </div>
+        📊 Expense Tracker Dashboard
+    </h1>
 """, unsafe_allow_html=True)
 
     categories_df = run_async(fetch_categories())
