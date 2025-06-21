@@ -11,6 +11,7 @@ import logging
 import matplotlib
 import plotly
 from datetime import datetime
+from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode, DataReturnMode
 
 # Initialize Supabase client
 supabaseUrl = 'https://ofvcxjmgynwzngobgamv.supabase.co'
@@ -382,38 +383,49 @@ elif st.session_state.current_screen == "main_menu":
         if st.button("🔄"):
             st.rerun()
 
-
-    # Display the expenses DataFrame with expense ID included and no index column 
     if not expenses_df.empty:
+        st.subheader("💸 Expense Details (Editable)")
+    
+        gb = GridOptionsBuilder.from_dataframe(expenses_df)
+        gb.configure_pagination(paginationAutoPageSize=False, paginationPageSize=10)
+        gb.configure_default_column(editable=False, groupable=True)
+        gb.configure_selection('single')  # enable single row selection
+        gb.configure_column("Expense Name", editable=True)
+        gb.configure_column("Amount", editable=True)
+        gb.configure_column("Expense Date", editable=False)
+        gb.configure_column("Category", editable=False)
+        
+        grid_options = gb.build()
+    
+        grid_response = AgGrid(
+            expenses_df,
+            gridOptions=grid_options,
+            height=400,
+            width='100%',
+            data_return_mode=DataReturnMode.AS_INPUT,
+            update_mode=GridUpdateMode.MODEL_CHANGED,
+            fit_columns_on_grid_load=True,
+            enable_enterprise_modules=False
+        )
+    
+        selected_rows = grid_response['selected_rows']
+    
+        # Show selected row below the grid
+        if selected_rows:
+            selected = selected_rows[0]
+            st.write("🔍 Selected Row:", selected)
+    
+            if st.button("✏️ Edit Selected"):
+                st.session_state.editing_expense = selected
+                st.session_state.current_screen = "inline_edit"
+                st.rerun()
+    
+            if st.button("🗑️ Delete Selected"):
+                run_async(delete_expense(selected['Expense ID']))
+                st.rerun()    
+    else:
+        st.info("No expenses found for the selected filters.")
 
-        for i, row in expenses_df.iterrows():
-            cols = st.columns([.75, .5, .5, .75, .25, .25])  # removed the 1st column for Expense ID
-        
-            with cols[0]:
-                st.write(row['Expense Name'])
-        
-            with cols[1]:
-                st.write(f"₹{row['Amount']}")
-        
-            with cols[2]:
-                st.write(row['Expense Date'])
-        
-            with cols[3]:
-                st.write(row['Category'])
-        
-            with cols[4]:
-                if st.button("✏️", key=f"edit_{row['Expense ID']}"):
-                    st.session_state.editing_expense = row.to_dict()
-                    st.session_state.current_screen = "inline_edit"
-                    st.rerun()
-        
-            with cols[5]:
-                if st.button("🗑️", key=f"delete_{row['Expense ID']}"):
-                    run_async(delete_expense(row['Expense ID']))
-                    st.rerun()
-
-    if  expenses_df.empty:
-         st.write("No Expense Details Found")
 
     # Pagination: Back and Next buttons 
     col1, col2 = st.columns([1, 1]) 
