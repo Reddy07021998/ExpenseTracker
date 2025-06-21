@@ -314,7 +314,7 @@ elif st.session_state.current_screen == "register":
 
 # Main Menu Screen
 elif st.session_state.current_screen == "main_menu":
-    st.Title("📊 Expense Tracker Dashboard")
+    st.Title("Expense Tracker Dashboard")
 
     categories_df = run_async(fetch_categories())
 
