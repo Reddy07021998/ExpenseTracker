@@ -423,9 +423,9 @@ elif st.session_state.current_screen == "main_menu":
 
         with cols[6]:
             if st.button("🗑️", key=f"delete_{row['Expense ID']}"):
-                st.session_state.deleting_expense = row.to_dict()
-                st.session_state.current_screen = "inline_delete"
+                run_async(delete_expense(row['Expense ID']))
                 st.rerun()
+
     else: 
         st.write("No expenses found based on the selected filters.")
 
@@ -672,7 +672,8 @@ elif st.session_state.current_screen == "inline_delete":
     if  row:
         run_async(delete_expense(row['Expense ID']))
         st.session_state.current_screen = "main_menu"        
-
+        st.rerun()
+        
     # Fetch expenses to populate a dropdown of expense IDs
     try:
         expenses_df = run_async(fetch_expenses(st.session_state.user_id))
