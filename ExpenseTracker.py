@@ -322,7 +322,7 @@ elif st.session_state.current_screen == "main_menu":
     '>
         <h1 style='
             color: #aeefff;
-            background-color: #111;
+            background-color: #444;
             font-size: 36px;
             font-family: "Segoe UI", sans-serif;
             font-weight: bold;
