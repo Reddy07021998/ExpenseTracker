@@ -368,19 +368,20 @@ elif st.session_state.current_screen == "main_menu":
         limit=st.session_state.page_limit))
 
     # Expense Details with action icons beside
-    cols = st.columns([1, .25, .25, .25])  # Adjust width ratio as needed
-    with cols[0]:
-        st.markdown("### Expense Details")
-    with cols[1]:
-        if st.button("📊"):
-            st.session_state.current_screen = "heatmap_view"
-            st.rerun()
-    with cols[2]:
-        if st.button("➕"):
+    col1, col2, col3 = st.columns([1, 1, 1])
+
+    with col1:
+        if st.button("➕ Add Expense"):
             st.session_state.current_screen = "add_expense"
             st.rerun()
-    with cols[3]:
-        if st.button("🔄"):
+    
+    with col2:
+        if st.button("🔄 Refresh"):
+            st.rerun()
+    
+    with col3:
+        if st.button("📊 Chart View"):
+            st.session_state.current_screen = "heatmap_view"
             st.rerun()
 
     if not expenses_df.empty:
