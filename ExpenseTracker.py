@@ -324,8 +324,8 @@ elif st.session_state.current_screen == "main_menu":
                font-size: 36px;
                font-family: "Verdana", sans-serif;
                text-shadow: 0 0 5px #00ffcc;
-               margin-top: 20px;
-               margin-bottom: 30px;'>
+               margin-top: 10px;
+               margin-bottom: 10px;'>
         💼 Expense Tracker Dashboard
     </h1>
 """, unsafe_allow_html=True)
