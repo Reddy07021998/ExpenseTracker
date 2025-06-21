@@ -375,7 +375,10 @@ elif st.session_state.current_screen == "main_menu":
         gb.configure_selection('single', use_checkbox=True)
 
         grid_options = gb.build()
-
+        
+        if not expenses_df.empty:
+         expenses_df = expenses_df.reset_index(drop=True)
+         
         grid_response = AgGrid(
             expenses_df,
             gridOptions=grid_options,
@@ -385,8 +388,6 @@ elif st.session_state.current_screen == "main_menu":
             height=400,
             width='100%'
         )
-
-        selected_rows = grid_response.get("selected_rows", [])
 
         selected_rows = grid_response.get("selected_rows", [])
 
