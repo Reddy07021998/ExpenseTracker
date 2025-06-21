@@ -385,47 +385,54 @@ elif st.session_state.current_screen == "main_menu":
             st.rerun()
 
     if not expenses_df.empty:
-        st.subheader("💸 Expense Details (Editable)")
-    
-        gb = GridOptionsBuilder.from_dataframe(expenses_df)
-        gb.configure_pagination(paginationAutoPageSize=False, paginationPageSize=10)
-        gb.configure_default_column(editable=False, groupable=True)
-        gb.configure_selection('single')  # enable single row selection
-        gb.configure_column("Expense Name", editable=True)
-        gb.configure_column("Amount", editable=True)
-        gb.configure_column("Expense Date", editable=False)
-        gb.configure_column("Category", editable=False)
+        st.subheader("💸 Expense Details")
         
-        grid_options = gb.build()
-    
-        grid_response = AgGrid(
-            expenses_df,
-            gridOptions=grid_options,
-            height=400,
-            width='100%',
-            data_return_mode=DataReturnMode.AS_INPUT,
-            update_mode=GridUpdateMode.MODEL_CHANGED,
-            fit_columns_on_grid_load=True,
-            enable_enterprise_modules=False
-        )
-    
-        selected_rows = grid_response['selected_rows']
-    
-        # Show selected row below the grid
-        if selected_rows:
-            selected = selected_rows[0]
-            st.write("🔍 Selected Row:", selected)
-    
-            if st.button("✏️ Edit Selected"):
-                st.session_state.editing_expense = selected
-                st.session_state.current_screen = "inline_edit"
-                st.rerun()
-    
-            if st.button("🗑️ Delete Selected"):
-                run_async(delete_expense(selected['Expense ID']))
-                st.rerun()    
-    else:
-        st.info("No expenses found for the selected filters.")
+        # Allow user to set how many rows to display per page
+        page_size = st.selectbox("Rows per page", [10, 20, 30, 50, 100], index=0)
+        
+        if not expenses_df.empty:
+            gb = GridOptionsBuilder.from_dataframe(expenses_df)
+            gb.configure_pagination(paginationAutoPageSize=False, paginationPageSize=page_size)
+            gb.configure_default_column(editable=False, groupable=True)
+            gb.configure_selection('single', use_checkbox=True)
+            gb.configure_column("Expense Name", editable=False)
+            gb.configure_column("Amount", editable=False)
+            gb.configure_column("Expense Date", editable=False)
+            gb.configure_column("Category", editable=False)
+        
+            grid_options = gb.build()
+        
+            grid_response = AgGrid(
+                expenses_df,
+                gridOptions=grid_options,
+                update_mode=GridUpdateMode.SELECTION_CHANGED,
+                data_return_mode=DataReturnMode.FILTERED_AND_SORTED,
+                fit_columns_on_grid_load=True,
+                height=400,
+                width='100%'
+            )
+        
+            selected_rows = grid_response.get("selected_rows", [])
+            
+            # Action Buttons
+            if selected_rows:
+                selected = selected_rows[0]  # safely access the first selected row
+        
+                st.markdown("### 🎯 Selected Expense")
+                st.write(selected)
+        
+                col1, col2 = st.columns([1, 1])
+                with col1:
+                    if st.button("✏️ Edit Selected"):
+                        st.session_state.editing_expense = selected
+                        st.session_state.current_screen = "inline_edit"
+                        st.rerun()
+                with col2:
+                    if st.button("🗑️ Delete Selected"):
+                        run_async(delete_expense(int(selected.get('Expense ID'))))
+                        st.rerun()
+        else:
+            st.info("No expenses found with the selected filters.")
 
 
     # Pagination: Back and Next buttons 
