@@ -463,7 +463,7 @@ elif st.session_state.current_screen == "heatmap_view":
         expenses_df = run_async(fetch_expenses(
             st.session_state.user_id,
             month_num= month_num,  # Filtered month
-            year= year,       # Filtered year
+            year= year_num,       # Filtered year
             category_id= category_id # Filtered category
         ))
 
