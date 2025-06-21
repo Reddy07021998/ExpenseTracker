@@ -367,27 +367,37 @@ elif st.session_state.current_screen == "main_menu":
     if not expenses_df.empty:
         st.subheader("💸 Expense Details")
 
-        page_size = 10 #st.selectbox("Rows per page", [10, 20, 30, 50, 100], index=0)
+        page_size = 10  # You can allow user selection if needed
 
-        #gb = GridOptionsBuilder.from_dataframe(expenses_df)
-        #gb.configure_pagination(paginationAutoPageSize=False, paginationPageSize=page_size)
-        #gb.configure_default_column(editable=False, groupable=True)
-        #gb.configure_selection('single', use_checkbox=True) 
+        # ✅ Ensure 'Expense Date' is in datetime format
+        if not pd.api.types.is_datetime64_any_dtype(expenses_df["Expense Date"]):
+            expenses_df["Expense Date"] = pd.to_datetime(expenses_df["Expense Date"])
 
+        # ✅ Build grid options with filters
         gb = GridOptionsBuilder.from_dataframe(expenses_df)
         gb.configure_pagination(paginationAutoPageSize=False, paginationPageSize=page_size)
         gb.configure_default_column(editable=True, groupable=True)
         gb.configure_selection('single', use_checkbox=True)
+
         gb.configure_column("Expense Name", editable=True)
         gb.configure_column("Amount", editable=True)
-        gb.configure_column("Expense Date", editable=True)
-        gb.configure_column("Category", editable=False)
+
+        # ✅ Date filter with calendar
+        gb.configure_column(
+            "Expense Date",
+            editable=True,
+            type=["dateColumnFilter", "customDateTimeFormat"],
+            custom_format_string="yyyy-MM-dd",
+            filter_params={"browserDatePicker": True}
+        )
+
+        # ✅ Add filter dropdown for category
+        gb.configure_column("Category", editable=False, filter="agSetColumnFilter")
 
         grid_options = gb.build()
-        
-        if not expenses_df.empty:
-         expenses_df = expenses_df.reset_index(drop=True)
-         
+
+        expenses_df = expenses_df.reset_index(drop=True)
+
         grid_response = AgGrid(
             expenses_df,
             gridOptions=grid_options,
@@ -402,7 +412,6 @@ elif st.session_state.current_screen == "main_menu":
 
         if isinstance(selected_rows, list) and len(selected_rows) > 0:
             selected = selected_rows[0]
-            st.write("Selected Row Keys:", selected.keys())  # Debug line
 
             selected_expense = {
                 "Expense ID": selected.get("Expense ID") or selected.get("expense_id"),
