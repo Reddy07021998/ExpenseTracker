@@ -327,9 +327,10 @@ elif st.session_state.current_screen == "main_menu":
     else:
         category_names = categories_df['category_name'].tolist()
     
-    # Display the icons for Add, Edit, and Delete actions
-    cols = st.columns([1, 1, 1])  # Adjust width ratio as needed
-    with col0:
+    # Display the icons for Add, Edit, and Delete actions    # Display the icons for Add, Edit, and Delete actions
+    col11, col12, col13 = st.columns(3)
+
+    with col11:
             # Month Names Dropdown (Jan, Feb, etc.)
             month_names = ["All", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
             month = st.selectbox("Select Month", month_names)
@@ -337,14 +338,14 @@ elif st.session_state.current_screen == "main_menu":
             # Determine month number from selected month
             month_num = None if month == "All" else month_names.index(month)
             
-    with col1:
+    with col12:
             # Category Dropdown
             category = st.selectbox("Select Category", ["All"] + category_names)
 
             # Determine category ID from category name
             category_id = None if category == "All" else categories_df[categories_df['category_name'] == category]['category_id'].values[0]
 
-    with col3:
+    with col13:
             from datetime import datetime
 
             current_year = datetime.now().year
