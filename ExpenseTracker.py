@@ -315,6 +315,21 @@ elif st.session_state.current_screen == "register":
 # Main Menu Screen
 elif st.session_state.current_screen == "main_menu":
     st.title("Expense Tracker Dashboard")
+    st.markdown("""
+    <h1 style='text-align: center;
+               color: white;
+               background-color: #222;
+               padding: 20px;
+               border-radius: 10px;
+               font-size: 36px;
+               font-family: "Verdana", sans-serif;
+               text-shadow: 0 0 5px #00ffcc;
+               margin-top: 20px;
+               margin-bottom: 30px;'>
+        💼 Expense Tracker Dashboard
+    </h1>
+""", unsafe_allow_html=True)
+
 
     categories_df = run_async(fetch_categories())
 
