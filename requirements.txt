@@ -8,3 +8,4 @@ supabase
 python-dotenv 
 plotly
 pip
+streamlit-aggrid
