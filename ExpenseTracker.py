@@ -380,7 +380,7 @@ elif st.session_state.current_screen == "main_menu":
         if not pd.api.types.is_datetime64_any_dtype(expenses_df["Expense Date"]):
             expenses_df["Expense Date"] = pd.to_datetime(expenses_df["Expense Date"])
 
-	        # Backup original data
+		# Backup original data
 		original_df = expenses_df.copy()
 		
 		# Grid Options with editing + selection
@@ -391,7 +391,7 @@ elif st.session_state.current_screen == "main_menu":
 		gb.configure_column("Expense Name", editable=True)
 		gb.configure_column("Amount", editable=True)
 		gb.configure_column("Expense Date", editable=True, type=["dateColumnFilter", "customDateTimeFormat"],
-		                    custom_format_string="yyyy-MM-dd", filter_params={"browserDatePicker": True})
+				    custom_format_string="yyyy-MM-dd", filter_params={"browserDatePicker": True})
 		gb.configure_column("Category", editable=False, filter="agSetColumnFilter")
 		grid_options = gb.build()
 		
