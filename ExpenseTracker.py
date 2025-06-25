@@ -203,13 +203,13 @@ async def fetch_expenses(user_id, month_num=None, year=None, category_id=None, o
 async def update_expense(expense_id, user_id, expense_name, amount, expense_date, category_id):
     try:
         # Ensure proper conversion for JSON serialization
-        expense_id = int(expense_id)  # Convert expense_id to int if it's not already
-        user_id = int(user_id)  # Convert user_id to int if it's not already
-        amount = float(amount)  # Convert amount to float
-        category_id = int(category_id)  # Convert category_id to int if it's not already
-        expense_date = str(expense_date)  # Ensure expense_date is a string in ISO format
+        expense_id = int(expense_id)
+        user_id = int(user_id)
+        amount = float(amount)
+        category_id = int(category_id)
+        expense_date = str(expense_date)
 
-        # Update the expense record in Supabase table
+        # Update the expense record in Supabase
         response = supabase.table('expenses').update({
             'expense_name': expense_name,
             'amount': amount,
@@ -217,18 +217,18 @@ async def update_expense(expense_id, user_id, expense_name, amount, expense_date
             'category_id': category_id
         }).eq('expense_id', expense_id).eq('user_id', user_id).execute()
 
-        # Updated response handling
+        # Response handling
         if hasattr(response, 'error') and response.error:
             st.error(f"Error updating expense: {response.error}")
             logging.error(f"Error updating expense: {response.error}")
-        elif hasattr(response, 'data'):
+        elif hasattr(response, 'data') or response.status_code in [200, 204]:
             st.success("Expense updated successfully!")
         else:
             st.warning("No response data, but update request was sent.")
 
     except Exception as e:
-        st.error(f"Exception during Edit: {e}")
-        logging.error(f"Exception editing expense_id={expense_id}: {e}")
+        st.error(f"Exception during update: {e}")
+        logging.error(f"Exception updating expense_id={expense_id}: {e}")
 	
 # Function to delete an expense
 async def delete_expense(expense_id):
