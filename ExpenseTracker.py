@@ -344,14 +344,14 @@ if st.session_state.current_screen == "main_menu":
             st.session_state.current_screen = "chat_expense"
             st.rerun()
 
-    # Fetch categories and expenses
+    # Fetch data
     categories_df = run_async(fetch_categories())
     expenses_df = run_async(fetch_expenses(st.session_state.user_id))
 
     if not expenses_df.empty:
         expenses_df["Expense Date"] = pd.to_datetime(expenses_df["Expense Date"])
 
-        # Configure AgGrid
+        # Build grid
         gb = GridOptionsBuilder.from_dataframe(expenses_df)
         gb.configure_pagination(paginationAutoPageSize=False, paginationPageSize=10)
         gb.configure_default_column(editable=True, groupable=True)
@@ -369,7 +369,7 @@ if st.session_state.current_screen == "main_menu":
         grid_options = gb.build()
         grid_options["paginationPageSizeSelector"] = [10, 20, 50, 100]
 
-        # Render AgGrid
+        # Render grid
         grid_response = AgGrid(
             expenses_df,
             gridOptions=grid_options,
@@ -382,34 +382,33 @@ if st.session_state.current_screen == "main_menu":
             width="100%",
         )
 
+        # Convert to DataFrame if needed and check selection
         selected = grid_response.get("selected_rows", [])
-        if isinstance(selected, list) and len(selected) > 0 and isinstance(selected[0], dict):
-            row = selected[0]
+        selected_df = pd.DataFrame(selected)
+
+        if not selected_df.empty:
+            row = selected_df.iloc[0]
             st.markdown("### 🎯 Selected Expense")
             st.write(row)
 
-            c1, c2 = st.columns(2)
-            with c1:
-                if st.button("✏️ Edit This", key=f"edit_{row['Expense ID']}"):
-                    st.session_state.editing_expense = {
-                        "Expense ID": row["Expense ID"],
-                        "Expense Name": row["Expense Name"],
-                        "Amount": row["Amount"],
-                        "Expense Date": row["Expense Date"],
-                        "Category": row["Category"],
-                    }
-                    st.session_state.current_screen = "inline_edit"
-                    st.rerun()
+            selected_action = st.radio("Choose Action", ["None", "Edit", "Delete"], horizontal=True)
 
-            with c2:
-                if st.button("🗑️ Delete This", key=f"delete_{row['Expense ID']}"):
-                    run_async(delete_expense(int(row["Expense ID"])))
-                    st.success("Deleted successfully.")
-                    st.rerun()
+            if selected_action == "Edit":
+                st.session_state.editing_expense = row.to_dict()
+                st.session_state.current_screen = "inline_edit"
+                st.rerun()
+
+            elif selected_action == "Delete":
+                run_async(delete_expense(int(row["Expense ID"])))
+                st.success("Deleted successfully.")
+                st.rerun()
         else:
-            st.info("Select a row above to Edit or Delete an expense.")
+            st.info("Select a row to show Edit/Delete options.")
 
-    # Logout button
+    else:
+        st.warning("No expense records found. Please add some.")
+
+    # Logout
     if st.button("Logout"):
         st.session_state.user_id = None
         st.session_state.current_screen = "login"
