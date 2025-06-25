@@ -325,7 +325,7 @@ elif st.session_state.current_screen == "main_menu":
     st.title("Expense Tracker Dashboard")
 
     # Actions Dropdown
-    with st.expander("⋮ Actions", expanded=False):
+    with st.expander("⋮", expanded=True):
         col1, col2, col3 = st.columns(3)
         with col1:
             if st.button("➕ Add Expense"):
