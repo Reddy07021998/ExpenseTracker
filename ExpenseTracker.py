@@ -329,75 +329,82 @@ elif st.session_state.current_screen == "main_menu":
 
     # Dropdown menu in col_action
     with col_action:
-        st.markdown("""
-            <style>
-                .menu-wrapper {
-                    position: relative;
-                    display: inline-block;
-                    float: right;
-                    z-index: 999;
+    st.markdown("""
+        <style>
+            .menu-wrapper {
+                position: relative;
+                display: inline-block;
+                float: right;
+                z-index: 1000;
+            }
+
+            .three-dots {
+                background: none;
+                border: none;
+                font-size: 24px;
+                cursor: pointer;
+                color: #444;
+            }
+
+            .menu-content {
+                display: none;
+                position: absolute;
+                top: 30px;
+                right: 0;
+                background-color: #ffffff;
+                box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+                padding: 5px 0;
+                border-radius: 8px;
+                min-width: 160px;
+                z-index: 1001;
+            }
+
+            .menu-item {
+                padding: 10px 20px;
+                cursor: pointer;
+                font-size: 14px;
+                color: #333;
+                background: none;
+                border: none;
+                width: 100%;
+                text-align: left;
+            }
+
+            .menu-item:hover {
+                background-color: #f0f0f0;
+            }
+        </style>
+
+        <script>
+            function toggleDropdown() {
+                var menu = document.getElementById("menu-content");
+                if (menu.style.display === "block") {
+                    menu.style.display = "none";
+                } else {
+                    menu.style.display = "block";
                 }
+            }
 
-                .three-dots {
-                    background: none;
-                    border: none;
-                    font-size: 24px;
-                    cursor: pointer;
+            document.addEventListener('click', function(event) {
+                var menu = document.getElementById("menu-content");
+                var button = document.getElementById("dots-button");
+                if (!button.contains(event.target) && !menu.contains(event.target)) {
+                    menu.style.display = "none";
                 }
+            });
+        </script>
 
-                .menu-content {
-                    display: none;
-                    position: absolute;
-                    right: 0;
-                    background-color: #fff;
-                    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
-                    padding: 5px 0;
-                    border-radius: 8px;
-                    min-width: 140px;
-                }
-
-                .menu-item {
-                    padding: 10px 20px;
-                    cursor: pointer;
-                    font-size: 14px;
-                    color: #000;
-                    background: none;
-                    border: none;
-                    width: 100%;
-                    text-align: left;
-                }
-
-                .menu-item:hover {
-                    background-color: #f2f2f2;
-                }
-            </style>
-
-            <script>
-                function toggleDropdown() {
-                    var menu = document.getElementById("menu-content");
-                    menu.style.display = menu.style.display === "block" ? "none" : "block";
-                }
-
-                document.addEventListener('click', function(event) {
-                    var menu = document.getElementById("menu-content");
-                    var button = document.getElementById("dots-button");
-                    if (!button.contains(event.target) && !menu.contains(event.target)) {
-                        menu.style.display = "none";
-                    }
-                });
-            </script>
-
-            <div class="menu-wrapper">
-                <button class="three-dots" id="dots-button" onclick="toggleDropdown()">⋮</button>
-                <div class="menu-content" id="menu-content">
-                    <form method="post">
-                        <button name="menu_action" value="add_expense" class="menu-item" type="submit">Add Expense</button>
-                        <button name="menu_action" value="refresh" class="menu-item" type="submit">Refresh</button>
-                        <button name="menu_action" value="chart_view" class="menu-item" type="submit">Chart View</button>
-                    </form>
-                </div>
+        <div class="menu-wrapper">
+            <button class="three-dots" id="dots-button" onclick="toggleDropdown()">⋮</button>
+            <div class="menu-content" id="menu-content">
+                <form method="post">
+                    <button name="menu_action" value="add_expense" class="menu-item" type="submit">Add Expense</button>
+                    <button name="menu_action" value="refresh" class="menu-item" type="submit">Refresh</button>
+                    <button name="menu_action" value="chart_view" class="menu-item" type="submit">Chart View</button>
+                </form>
             </div>
-        """, unsafe_allow_html=True)
+        </div>
+    """, unsafe_allow_html=True)
 
     # Menu Action Handler
     menu_action = st.query_params.get("menu_action")
