@@ -397,45 +397,68 @@ elif st.session_state.current_screen == "main_menu":
 
         expenses_df = expenses_df.reset_index(drop=True)
 
-        grid_response = AgGrid(
-            expenses_df,
-            gridOptions=grid_options,
-            update_mode=GridUpdateMode.SELECTION_CHANGED,
-            data_return_mode=DataReturnMode.FILTERED_AND_SORTED,
-            fit_columns_on_grid_load=True,
-            height=400,
-            width='100%'
-        )
-
-        selected_rows = grid_response.get("selected_rows", [])
-
-        if isinstance(selected_rows, list) and len(selected_rows) > 0:
-            selected = selected_rows[0]
-
-            selected_expense = {
-                "Expense ID": selected.get("Expense ID") or selected.get("expense_id"),
-                "Expense Name": selected.get("Expense Name") or selected.get("expense_name"),
-                "Amount": selected.get("Amount") or selected.get("amount"),
-                "Expense Date": selected.get("Expense Date") or selected.get("expense_date"),
-                "Category": selected.get("Category") or selected.get("category")
-            }
-
-            st.markdown("### 🎯 Selected Expense")
-            st.write(selected_expense)
-
-            col1, col2 = st.columns(2)
-            with col1:
-                if st.button("✏️ Edit Selected"):
-                    st.session_state.editing_expense = selected_expense
-                    st.session_state.current_screen = "inline_edit"
-                    st.rerun()
-            with col2:
-                if st.button("🗑️ Delete Selected"):
-                    run_async(delete_expense(int(selected_expense["Expense ID"])))
-                    st.rerun()
-        else:
-            st.info("Select an expense to edit or delete.")
-
+	# 🔄 Editable Grid
+	grid_response = AgGrid(
+	    expenses_df,
+	    gridOptions=grid_options,
+	    update_mode=GridUpdateMode.VALUE_CHANGED,
+	    data_return_mode=DataReturnMode.FILTERED_AND_SORTED,
+	    fit_columns_on_grid_load=True,
+	    height=400,
+	    width='100%'
+	)
+	
+	# 🚀 Get updated data after inline editing
+	updated_rows = pd.DataFrame(grid_response.get("data", []))
+	
+	# Detect & update changed rows
+	for idx in range(len(expenses_df)):
+	    original = expenses_df.iloc[idx]
+	    updated = updated_rows.iloc[idx]
+	    
+	    if not original.equals(updated):
+	        try:
+	            run_async(update_expense(
+	                expense_id=int(updated["Expense ID"]),
+	                user_id=int(st.session_state.user_id),
+	                expense_name=updated["Expense Name"],
+	                amount=float(updated["Amount"]),
+	                expense_date=pd.to_datetime(updated["Expense Date"]).isoformat(),
+	                category_id=int(categories_df[categories_df["category_name"] == updated["Category"]]["category_id"].values[0])
+	            ))
+	            st.success(f"Row {idx+1} updated successfully.")
+	        except Exception as e:
+	            st.error(f"Failed to update row {idx+1}: {e}")
+	
+	# 🎯 Row selection and delete/edit options
+	selected_rows = grid_response.get("selected_rows", [])
+	
+	if isinstance(selected_rows, list) and len(selected_rows) > 0:
+	    selected = selected_rows[0]
+	
+	    selected_expense = {
+	        "Expense ID": selected.get("Expense ID") or selected.get("expense_id"),
+	        "Expense Name": selected.get("Expense Name") or selected.get("expense_name"),
+	        "Amount": selected.get("Amount") or selected.get("amount"),
+	        "Expense Date": selected.get("Expense Date") or selected.get("expense_date"),
+	        "Category": selected.get("Category") or selected.get("category")
+	    }
+	
+	    st.markdown("### 🎯 Selected Expense")
+	    st.write(selected_expense)
+	
+	    col1, col2 = st.columns(2)
+	    with col1:
+	        if st.button("✏️ Edit Selected"):
+	            st.session_state.editing_expense = selected_expense
+	            st.session_state.current_screen = "inline_edit"
+	            st.rerun()
+	    with col2:
+	        if st.button("🗑️ Delete Selected"):
+	            run_async(delete_expense(int(selected_expense["Expense ID"])))
+	            st.rerun()
+	else:
+	    st.info("Select an expense to edit or delete.")
 
     if st.button("Logout"):
         st.session_state.user_id = None
