@@ -372,50 +372,37 @@ elif st.session_state.current_screen == "main_menu":
         if not pd.api.types.is_datetime64_any_dtype(expenses_df["Expense Date"]):
             expenses_df["Expense Date"] = pd.to_datetime(expenses_df["Expense Date"])
 
-        # ✅ Build grid options with filters
-        gb = GridOptionsBuilder.from_dataframe(expenses_df)
-        gb.configure_pagination(paginationAutoPageSize=False, paginationPageSize=page_size)
-        gb.configure_default_column(editable=True, groupable=True)
-        gb.configure_selection('single', use_checkbox=True)
-
-        gb.configure_column("Expense Name", editable=True)
-        gb.configure_column("Amount", editable=True)
-
-        # ✅ Date filter with calendar
-        gb.configure_column(
-            "Expense Date",
-            editable=True,  
-            type=["dateColumnFilter", "customDateTimeFormat"],
-            custom_format_string="yyyy-MM-dd",
-            filter_params={"browserDatePicker": True}
-        )
-
-        # ✅ Add filter dropdown for category
-        gb.configure_column("Category", editable=False, filter="agSetColumnFilter")
-
-        grid_options = gb.build()
-
-        expenses_df = expenses_df.reset_index(drop=True)
-
-	# 🔄 Editable Grid
+        # Backup original data
+	original_df = expenses_df.copy()
+	
+	# Grid Options with editing + selection
+	gb = GridOptionsBuilder.from_dataframe(expenses_df)
+	gb.configure_pagination(paginationAutoPageSize=False, paginationPageSize=10)
+	gb.configure_default_column(editable=True, groupable=True)
+	gb.configure_selection('single', use_checkbox=True)
+	gb.configure_column("Expense Name", editable=True)
+	gb.configure_column("Amount", editable=True)
+	gb.configure_column("Expense Date", editable=True, type=["dateColumnFilter", "customDateTimeFormat"],
+	                    custom_format_string="yyyy-MM-dd", filter_params={"browserDatePicker": True})
+	gb.configure_column("Category", editable=False, filter="agSetColumnFilter")
+	grid_options = gb.build()
+	
+	# Display grid
 	grid_response = AgGrid(
 	    expenses_df,
 	    gridOptions=grid_options,
-	    update_mode=GridUpdateMode.VALUE_CHANGED,
+	    update_mode=GridUpdateMode.MODEL_CHANGED,
 	    data_return_mode=DataReturnMode.FILTERED_AND_SORTED,
 	    fit_columns_on_grid_load=True,
 	    height=400,
 	    width='100%'
 	)
 	
-	# 🚀 Get updated data after inline editing
-	updated_rows = pd.DataFrame(grid_response.get("data", []))
-	
-	# Detect & update changed rows
-	for idx in range(len(expenses_df)):
-	    original = expenses_df.iloc[idx]
-	    updated = updated_rows.iloc[idx]
-	    
+	# 🔄 Inline Edit Detection
+	updated_df = pd.DataFrame(grid_response["data"])
+	for idx in range(len(original_df)):
+	    original = original_df.iloc[idx]
+	    updated = updated_df.iloc[idx]
 	    if not original.equals(updated):
 	        try:
 	            run_async(update_expense(
@@ -430,18 +417,16 @@ elif st.session_state.current_screen == "main_menu":
 	        except Exception as e:
 	            st.error(f"Failed to update row {idx+1}: {e}")
 	
-	# 🎯 Row selection and delete/edit options
+	# 🎯 Row Selection for manual edit/delete
 	selected_rows = grid_response.get("selected_rows", [])
-	
-	if isinstance(selected_rows, list) and len(selected_rows) > 0:
+	if selected_rows:
 	    selected = selected_rows[0]
-	
 	    selected_expense = {
-	        "Expense ID": selected.get("Expense ID") or selected.get("expense_id"),
-	        "Expense Name": selected.get("Expense Name") or selected.get("expense_name"),
-	        "Amount": selected.get("Amount") or selected.get("amount"),
-	        "Expense Date": selected.get("Expense Date") or selected.get("expense_date"),
-	        "Category": selected.get("Category") or selected.get("category")
+	        "Expense ID": selected.get("Expense ID"),
+	        "Expense Name": selected.get("Expense Name"),
+	        "Amount": selected.get("Amount"),
+	        "Expense Date": selected.get("Expense Date"),
+	        "Category": selected.get("Category")
 	    }
 	
 	    st.markdown("### 🎯 Selected Expense")
@@ -459,6 +444,7 @@ elif st.session_state.current_screen == "main_menu":
 	            st.rerun()
 	else:
 	    st.info("Select an expense to edit or delete.")
+
 
     if st.button("Logout"):
         st.session_state.user_id = None
