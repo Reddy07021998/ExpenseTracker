@@ -320,24 +320,67 @@ elif st.session_state.current_screen == "register":
         st.rerun()
 
 # Main Menu Screen
+# Main Menu Screen
 elif st.session_state.current_screen == "main_menu":
     st.title("Expense Tracker Dashboard")
 
-    # Actions + Header
-    col_header, col_action = st.columns([9, 1], gap="small")
-    col_header.subheader("💸 Expense Details")
+    # Header Section
+    st.markdown("""
+        <div style='display: flex; justify-content: space-between; align-items: center;'>
+            <h2 style='margin: 0;'>💸 Expense Details</h2>
+        </div>
+    """, unsafe_allow_html=True)
 
-    with col_action:
-        action = st.selectbox("⋮", ["Select Action", "Add Expense", "Refresh", "Chart View"], key="action_box")
+    # Floating Action Button (FAB) Menu
+    st.markdown("""
+        <style>
+            .fab-container {
+                position: fixed;
+                top: 100px;
+                right: 30px;
+                z-index: 9999;
+                display: flex;
+                flex-direction: column;
+                align-items: flex-end;
+            }
 
-    # Handle Actions
-    if action == "Add Expense":
-        st.session_state.current_screen = "add_expense"
-        st.rerun()
-    elif action == "Refresh":
-        st.rerun()
-    elif action == "Chart View":
-        st.session_state.current_screen = "heatmap_view"
+            .fab-button {
+                background-color: #4CAF50;
+                color: white;
+                border: none;
+                border-radius: 50px;
+                padding: 10px 20px;
+                margin-top: 8px;
+                cursor: pointer;
+                font-size: 14px;
+                box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+                transition: background-color 0.3s ease;
+            }
+
+            .fab-button:hover {
+                background-color: #45a049;
+            }
+        </style>
+
+        <div class="fab-container">
+            <form method="post">
+                <button name="menu_action" value="add_expense" class="fab-button">➕ Add Expense</button>
+                <button name="menu_action" value="refresh" class="fab-button">🔄 Refresh</button>
+                <button name="menu_action" value="chart_view" class="fab-button">📊 Chart View</button>
+            </form>
+        </div>
+    """, unsafe_allow_html=True)
+
+    # Handle FAB actions
+    menu_action = st.query_params.get("menu_action")
+    if menu_action:
+        if menu_action == "add_expense":
+            st.session_state.current_screen = "add_expense"
+        elif menu_action == "refresh":
+            pass
+        elif menu_action == "chart_view":
+            st.session_state.current_screen = "heatmap_view"
+        st.query_params.clear()
         st.rerun()
 
     # Fetch data
@@ -378,31 +421,33 @@ elif st.session_state.current_screen == "main_menu":
             width="100%",
         )
 
-        # Convert to DataFrame if needed and check selection
+        # Handle selected row
         selected = grid_response.get("selected_rows", [])
-        selected_df = pd.DataFrame(selected)
-
-        if not selected_df.empty:
-            row = selected_df.iloc[0]
+        if isinstance(selected, list) and len(selected) > 0 and isinstance(selected[0], dict):
+            row = selected[0]
             st.markdown("### 🎯 Selected Expense")
             st.write(row)
 
-            selected_action = st.radio("Choose Action", ["None", "Edit", "Delete"], horizontal=True)
+            edit_exp_col, del_exp_col = st.columns([1, 1])
+            with edit_exp_col:
+                if st.button("✏️ Edit Selected", key=f"edit_{row['Expense ID']}"):
+                    st.session_state.editing_expense = {
+                        "Expense ID": row["Expense ID"],
+                        "Expense Name": row["Expense Name"],
+                        "Amount": row["Amount"],
+                        "Expense Date": row["Expense Date"],
+                        "Category": row["Category"],
+                    }
+                    st.session_state.current_screen = "inline_edit"
+                    st.rerun()
 
-            if selected_action == "Edit":
-                st.session_state.editing_expense = row.to_dict()
-                st.session_state.current_screen = "inline_edit"
-                st.rerun()
-
-            elif selected_action == "Delete":
-                run_async(delete_expense(int(row["Expense ID"])))
-                st.success("Deleted successfully.")
-                st.rerun()
+            with del_exp_col:
+                if st.button("🗑️ Delete Selected", key=f"del_{row['Expense ID']}"):
+                    run_async(delete_expense(int(row["Expense ID"])))
+                    st.success("Deleted successfully.")
+                    st.rerun()
         else:
             st.info("Select a row to show Edit/Delete options.")
-
-    else:
-        st.warning("No expense records found. Please add some.")
 
     # Logout
     if st.button("Logout"):
