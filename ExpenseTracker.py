@@ -384,7 +384,7 @@ elif st.session_state.current_screen == "main_menu":
         """, unsafe_allow_html=True)
 
     # Menu Action Handler (handle before rendering)
-    menu_action = st.experimental_get_query_params().get("menu_action", [None])[0]
+    menu_action = st.query_params.get("menu_action", [None])[0]
     if menu_action:
         if menu_action == "add_expense":
             st.session_state.current_screen = "add_expense"
