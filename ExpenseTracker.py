@@ -228,8 +228,8 @@ async def update_expense(expense_id, user_id, expense_name, amount, expense_date
 
 # Function to delete an expense
 async def delete_expense(expense_id):
-    try:		
-		response = supabase.table('expenses').delete().eq('expense_id', expense_id).execute()
+    try:
+        response = supabase.table('expenses').delete().eq('expense_id', expense_id).execute()
 
         # Updated response handling
         if hasattr(response, 'error') and response.error:
@@ -239,6 +239,10 @@ async def delete_expense(expense_id):
             st.success("Expense deleted successfully!")
         else:
             st.warning("No response data, but delete request was sent.")
+
+    except Exception as e:
+        st.error(f"Exception during deletion: {e}")
+        logging.error(f"Exception deleting expense_id={expense_id}: {e}")
 
 # Helper function to run async code within the synchronous environment
 def run_async(coroutine_func):
