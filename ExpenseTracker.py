@@ -386,64 +386,70 @@ elif st.session_state.current_screen == "main_menu":
         gb.configure_column("Category", editable=False, filter="agSetColumnFilter")
         grid_options = gb.build()
 
-        grid_response = AgGrid(
-            expenses_df,
-            gridOptions=grid_options,
-            update_mode=GridUpdateMode.MODEL_CHANGED,
-            data_return_mode=DataReturnMode.FILTERED_AND_SORTED,
-            fit_columns_on_grid_load=True,
-            height=400,
-            width='100%'
-        )
-
-        updated_df = pd.DataFrame(grid_response["data"])
-        changed_indices = []
-        for idx in range(len(original_df)):
-            if not original_df.iloc[idx].equals(updated_df.iloc[idx]):
-                changed_indices.append(idx)
-
-        for idx in changed_indices:
-            updated = updated_df.iloc[idx]
-            try:
-                run_async(update_expense(
-                    expense_id=int(updated["Expense ID"]),
-                    user_id=int(st.session_state.user_id),
-                    expense_name=updated["Expense Name"],
-                    amount=float(updated["Amount"]),
-                    expense_date=pd.to_datetime(updated["Expense Date"]).isoformat(),
-                    category_id=int(categories_df[categories_df["category_name"] == updated["Category"]]["category_id"].values[0])
-                ))
-                st.success(f"Row {idx + 1} updated successfully.")
-            except Exception as e:
-                st.error(f"Failed to update row {idx + 1}: {e}")
-
-        selected_rows = grid_response.get("selected_rows", [])
-        if selected_rows:
-            selected = selected_rows[0]
-            selected_expense = {
-                "Expense ID": selected.get("Expense ID"),
-                "Expense Name": selected.get("Expense Name"),
-                "Amount": selected.get("Amount"),
-                "Expense Date": selected.get("Expense Date"),
-                "Category": selected.get("Category")
-            }
-
-            st.markdown("### 🎯 Selected Expense")
-            st.write(selected_expense)
-
-            col1, col2 = st.columns(2)
-            with col1:
-                if st.button("✏️ Edit Selected"):
-                    st.session_state.editing_expense = selected_expense
-                    st.session_state.current_screen = "inline_edit"
-                    st.rerun()
-            with col2:
-                if st.button("🗑️ Delete Selected"):
-                    run_async(delete_expense(int(selected_expense["Expense ID"])))
-                    st.rerun()
-        else:
-            st.info("Select an expense to edit or delete.")
-
+        # Display the expense grid
+	grid_response = AgGrid(
+	    expenses_df,
+	    gridOptions=grid_options,
+	    update_mode=GridUpdateMode.MODEL_CHANGED,
+	    data_return_mode=DataReturnMode.FILTERED_AND_SORTED,
+	    fit_columns_on_grid_load=True,
+	    enable_enterprise_modules=True,
+	    allow_unsafe_jscode=True,
+	    height=400,
+	    width='100%'
+	)
+	
+	# Detect updated rows only
+	updated_df = pd.DataFrame(grid_response["data"])
+	changed_indices = []
+	for idx in range(len(expenses_df)):
+	    if not expenses_df.iloc[idx].equals(updated_df.iloc[idx]):
+	        changed_indices.append(idx)
+	
+	# Update only changed rows
+	for idx in changed_indices:
+	    updated = updated_df.iloc[idx]
+	    try:
+	        run_async(update_expense(
+	            expense_id=int(updated["Expense ID"]),
+	            user_id=int(st.session_state.user_id),
+	            expense_name=updated["Expense Name"],
+	            amount=float(updated["Amount"]),
+	            expense_date=pd.to_datetime(updated["Expense Date"]).isoformat(),
+	            category_id=int(categories_df[categories_df["category_name"] == updated["Category"]]["category_id"].values[0])
+	        ))
+	        st.success(f"Row {idx + 1} updated successfully.")
+	    except Exception as e:
+	        st.error(f"Failed to update row {idx + 1}: {e}")
+	
+	# Handle row selection for edit/delete popup
+	selected_rows = grid_response.get("selected_rows", [])
+	if selected_rows:
+	    selected = selected_rows[0]
+	    selected_expense = {
+	        "Expense ID": selected["Expense ID"],
+	        "Expense Name": selected["Expense Name"],
+	        "Amount": selected["Amount"],
+	        "Expense Date": selected["Expense Date"],
+	        "Category": selected["Category"]
+	    }
+	
+	    st.markdown("### 🎯 Selected Expense")
+	    st.write(selected_expense)
+	
+	    col1, col2 = st.columns(2)
+	    with col1:
+	        if st.button("✏️ Edit Selected"):
+	            st.session_state.editing_expense = selected_expense
+	            st.session_state.current_screen = "inline_edit"
+	            st.rerun()
+	    with col2:
+	        if st.button("🗑️ Delete Selected"):
+	            run_async(delete_expense(int(selected_expense["Expense ID"])))
+	            st.rerun()
+	else:
+	    st.info("Select an expense row to edit or delete.")
+    
     if st.button("Logout"):
         st.session_state.user_id = None
         st.session_state.current_screen = "login"
