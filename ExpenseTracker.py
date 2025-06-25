@@ -324,7 +324,7 @@ elif st.session_state.current_screen == "register":
 elif st.session_state.current_screen == "main_menu":
     st.title("Expense Tracker Dashboard")
 
-    # Subheader + three-dot action menu in one row
+    # Subheader + three-dot action menu
     col_header, col_action = st.columns([9, 1], gap="small")
     col_header.subheader("💸 Expense Details")
     with col_action.expander("⋮", expanded=False):
@@ -343,7 +343,6 @@ elif st.session_state.current_screen == "main_menu":
 
     if not expenses_df.empty:
         expenses_df["Expense Date"] = pd.to_datetime(expenses_df["Expense Date"])
-        original_df = expenses_df.copy()
 
         # Configure AG Grid
         gb = GridOptionsBuilder.from_dataframe(expenses_df)
@@ -363,11 +362,11 @@ elif st.session_state.current_screen == "main_menu":
         grid_options = gb.build()
         grid_options["paginationPageSizeSelector"] = [10, 20, 50, 100]
 
-        # Display Grid
+        # Display Grid (no auto-update logic)
         grid_response = AgGrid(
             expenses_df,
             gridOptions=grid_options,
-            update_mode=GridUpdateMode.SELECTION_CHANGED,
+            update_mode=GridUpdateMode.VALUE_CHANGED,
             data_return_mode=DataReturnMode.AS_INPUT,
             fit_columns_on_grid_load=True,
             enable_enterprise_modules=True,
@@ -375,32 +374,6 @@ elif st.session_state.current_screen == "main_menu":
             height=400,
             width='100%'
         )
-
-        # Auto-save: detect VALUE_CHANGED edits in grid_response["data"]
-        updated_df = pd.DataFrame(grid_response["data"])
-        changed_indices = [
-            idx for idx in range(len(original_df))
-            if not original_df.iloc[idx].equals(pd.Series(updated_df.iloc[idx]))
-        ]
-        if changed_indices:
-            for idx in changed_indices:
-                u = updated_df.iloc[idx]
-                try:
-                    run_async(update_expense(
-                        expense_id=int(u["Expense ID"]),
-                        user_id=int(st.session_state.user_id),
-                        expense_name=u["Expense Name"],
-                        amount=float(u["Amount"]),
-                        expense_date=pd.to_datetime(u["Expense Date"]).isoformat(),
-                        category_id=int(
-                            categories_df[
-                                categories_df["category_name"] == u["Category"]
-                            ]["category_id"].values[0]
-                        )
-                    ))
-                except Exception as e:
-                    st.error(f"Error updating row {idx + 1}: {e}")
-            st.success(f"✅ {len(changed_indices)} record(s) updated.")
 
         # Row selection popup actions
         selected = grid_response.get("selected_rows", [])
