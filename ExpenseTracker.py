@@ -324,22 +324,18 @@ elif st.session_state.current_screen == "register":
 elif st.session_state.current_screen == "main_menu":
     st.title("Expense Tracker Dashboard")
 
-    # Actions Dropdown
-    with st.expander("⋮", expanded=True):
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            if st.button("➕ Add Expense"):
-                st.session_state.current_screen = "add_expense"
-                st.rerun()
-        with col2:
-            if st.button("🔄 Refresh"):
-                st.rerun()
-        with col3:
-            if st.button("📊 Chart View"):
-                st.session_state.current_screen = "heatmap_view"
-                st.rerun()
-
-    st.subheader("💸 Expense Details")
+    # Subheader + three-dot action menu in one row
+    col_header, col_action = st.columns([9, 1], gap="small")
+    col_header.subheader("💸 Expense Details")
+    with col_action.expander("⋮", expanded=False):
+        if st.button("➕ Add Expense"):
+            st.session_state.current_screen = "add_expense"
+            st.rerun()
+        if st.button("🔄 Refresh"):
+            st.rerun()
+        if st.button("📊 Chart View"):
+            st.session_state.current_screen = "heatmap_view"
+            st.rerun()
 
     # Fetch categories and expenses
     categories_df = run_async(fetch_categories())
@@ -365,16 +361,14 @@ elif st.session_state.current_screen == "main_menu":
         )
         gb.configure_column("Category", editable=False, filter="agSetColumnFilter")
         grid_options = gb.build()
-
-        # Manually add page-size selector options
         grid_options["paginationPageSizeSelector"] = [10, 20, 50, 100]
 
         # Display Grid
         grid_response = AgGrid(
             expenses_df,
             gridOptions=grid_options,
-            update_mode=GridUpdateMode.VALUE_CHANGED,
-            data_return_mode=DataReturnMode.FILTERED_AND_SORTED,
+            update_mode=GridUpdateMode.SELECTION_CHANGED,
+            data_return_mode=DataReturnMode.AS_INPUT,
             fit_columns_on_grid_load=True,
             enable_enterprise_modules=True,
             allow_unsafe_jscode=True,
@@ -382,7 +376,7 @@ elif st.session_state.current_screen == "main_menu":
             width='100%'
         )
 
-        # Auto-save only changed rows
+        # Auto-save: detect VALUE_CHANGED edits in grid_response["data"]
         updated_df = pd.DataFrame(grid_response["data"])
         changed_indices = [
             idx for idx in range(len(original_df))
@@ -390,49 +384,49 @@ elif st.session_state.current_screen == "main_menu":
         ]
         if changed_indices:
             for idx in changed_indices:
-                updated = updated_df.iloc[idx]
+                u = updated_df.iloc[idx]
                 try:
                     run_async(update_expense(
-                        expense_id=int(updated["Expense ID"]),
+                        expense_id=int(u["Expense ID"]),
                         user_id=int(st.session_state.user_id),
-                        expense_name=updated["Expense Name"],
-                        amount=float(updated["Amount"]),
-                        expense_date=pd.to_datetime(updated["Expense Date"]).isoformat(),
+                        expense_name=u["Expense Name"],
+                        amount=float(u["Amount"]),
+                        expense_date=pd.to_datetime(u["Expense Date"]).isoformat(),
                         category_id=int(
                             categories_df[
-                                categories_df["category_name"] == updated["Category"]
+                                categories_df["category_name"] == u["Category"]
                             ]["category_id"].values[0]
                         )
                     ))
                 except Exception as e:
                     st.error(f"Error updating row {idx + 1}: {e}")
-            st.success(f"✅ {len(changed_indices)} record(s) updated successfully.")
+            st.success(f"✅ {len(changed_indices)} record(s) updated.")
 
         # Row selection popup actions
-        selected_rows = grid_response.get("selected_rows", [])
-        if selected_rows:
-            selected = selected_rows[0]
-            selected_expense = {
-                "Expense ID": selected["Expense ID"],
-                "Expense Name": selected["Expense Name"],
-                "Amount": selected["Amount"],
-                "Expense Date": selected["Expense Date"],
-                "Category": selected["Category"]
+        selected = grid_response.get("selected_rows", [])
+        if selected:
+            s = selected[0]
+            sel = {
+                "Expense ID": s["Expense ID"],
+                "Expense Name": s["Expense Name"],
+                "Amount": s["Amount"],
+                "Expense Date": s["Expense Date"],
+                "Category": s["Category"]
             }
             with st.expander("🎯 Selected Row Actions", expanded=True):
-                st.write(selected_expense)
-                col1, col2 = st.columns(2)
-                with col1:
+                st.write(sel)
+                c1, c2 = st.columns(2)
+                with c1:
                     if st.button("✏️ Edit Selected"):
-                        st.session_state.editing_expense = selected_expense
+                        st.session_state.editing_expense = sel
                         st.session_state.current_screen = "inline_edit"
                         st.rerun()
-                with col2:
+                with c2:
                     if st.button("🗑️ Delete Selected"):
-                        run_async(delete_expense(int(selected_expense["Expense ID"])))
+                        run_async(delete_expense(int(sel["Expense ID"])))
                         st.rerun()
         else:
-            st.info("Select a row to view Edit/Delete options.")
+            st.info("Select a row to see Edit/Delete options.")
 
     # Logout Button
     if st.button("Logout"):
