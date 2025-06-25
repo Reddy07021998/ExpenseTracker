@@ -324,11 +324,10 @@ elif st.session_state.current_screen == "main_menu":
     st.title("Expense Tracker Dashboard")
 
     categories_df = run_async(fetch_categories())
-
     if categories_df.empty:
         st.write("No categories available.")
-    else:
-        category_names = categories_df['category_name'].tolist()
+        st.stop()
+    category_names = categories_df['category_name'].tolist()
 
     col11, col12, col13 = st.columns([1, 1, 1])
 
@@ -348,7 +347,6 @@ elif st.session_state.current_screen == "main_menu":
         year = st.selectbox("Select Year", year_options)
         year_num = None if year == "All" else int(year)
 
-    # ✅ Fetch all expenses (no offset/limit)
     expenses_df = run_async(fetch_expenses(
         st.session_state.user_id,
         month_num=month_num,
@@ -356,8 +354,7 @@ elif st.session_state.current_screen == "main_menu":
         category_id=category_id
     ))
 
-    # Actions
-    col1, col2, col3 = st.columns([.5, .5, .5])
+    col1, col2, col3 = st.columns(3)
     with col1:
         if st.button("➕ Add Expense"):
             st.session_state.current_screen = "add_expense"
@@ -370,24 +367,18 @@ elif st.session_state.current_screen == "main_menu":
             st.session_state.current_screen = "heatmap_view"
             st.rerun()
 
-    # ✅ AgGrid Display
     if not expenses_df.empty:
         st.subheader("💸 Expense Details")
 
-        page_size = 10  # You can allow user selection if needed
-
-        # ✅ Ensure 'Expense Date' is in datetime format
         if not pd.api.types.is_datetime64_any_dtype(expenses_df["Expense Date"]):
             expenses_df["Expense Date"] = pd.to_datetime(expenses_df["Expense Date"])
 
-        # Backup original data
         original_df = expenses_df.copy()
 
-        # Grid Options with editing + selection
         gb = GridOptionsBuilder.from_dataframe(expenses_df)
         gb.configure_pagination(paginationAutoPageSize=False, paginationPageSize=10)
         gb.configure_default_column(editable=True, groupable=True)
-        gb.configure_selection('single', use_checkbox=True)
+        gb.configure_selection("single", use_checkbox=True)
         gb.configure_column("Expense Name", editable=True)
         gb.configure_column("Amount", editable=True)
         gb.configure_column("Expense Date", editable=True, type=["dateColumnFilter", "customDateTimeFormat"],
@@ -395,7 +386,6 @@ elif st.session_state.current_screen == "main_menu":
         gb.configure_column("Category", editable=False, filter="agSetColumnFilter")
         grid_options = gb.build()
 
-        # Display grid
         grid_response = AgGrid(
             expenses_df,
             gridOptions=grid_options,
@@ -406,26 +396,27 @@ elif st.session_state.current_screen == "main_menu":
             width='100%'
         )
 
-        # 🔄 Inline Edit Detection
         updated_df = pd.DataFrame(grid_response["data"])
+        changed_indices = []
         for idx in range(len(original_df)):
-            original = original_df.iloc[idx]
-            updated = updated_df.iloc[idx]
-            if not original.equals(updated):
-                try:
-                    run_async(update_expense(
-                        expense_id=int(updated["Expense ID"]),
-                        user_id=int(st.session_state.user_id),
-                        expense_name=updated["Expense Name"],
-                        amount=float(updated["Amount"]),
-                        expense_date=pd.to_datetime(updated["Expense Date"]).isoformat(),
-                        category_id=int(categories_df[categories_df["category_name"] == updated["Category"]]["category_id"].values[0])
-                    ))
-                    st.success(f"Row {idx + 1} updated successfully.")
-                except Exception as e:
-                    st.error(f"Failed to update row {idx + 1}: {e}")
+            if not original_df.iloc[idx].equals(updated_df.iloc[idx]):
+                changed_indices.append(idx)
 
-        # 🎯 Row Selection for manual edit/delete
+        for idx in changed_indices:
+            updated = updated_df.iloc[idx]
+            try:
+                run_async(update_expense(
+                    expense_id=int(updated["Expense ID"]),
+                    user_id=int(st.session_state.user_id),
+                    expense_name=updated["Expense Name"],
+                    amount=float(updated["Amount"]),
+                    expense_date=pd.to_datetime(updated["Expense Date"]).isoformat(),
+                    category_id=int(categories_df[categories_df["category_name"] == updated["Category"]]["category_id"].values[0])
+                ))
+                st.success(f"Row {idx + 1} updated successfully.")
+            except Exception as e:
+                st.error(f"Failed to update row {idx + 1}: {e}")
+
         selected_rows = grid_response.get("selected_rows", [])
         if selected_rows:
             selected = selected_rows[0]
