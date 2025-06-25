@@ -328,7 +328,7 @@ elif st.session_state.current_screen == "main_menu":
     col_header.subheader("💸 Expense Details")
 
     with col_action:
-        action = st.selectbox("\u22ee", ["Select Action", "Add Expense", "Refresh", "Chart View"])
+        action = st.selectbox("⋮", ["Select Action", "Add Expense", "Refresh", "Chart View"], key="action_box")
 
     # Handle Actions
     if action == "Add Expense":
@@ -378,25 +378,26 @@ elif st.session_state.current_screen == "main_menu":
             width="100%",
         )
 
-        # Handle selected row
+        # Convert to DataFrame if needed and check selection
         selected = grid_response.get("selected_rows", [])
-        if selected and isinstance(selected[0], dict):
-            row = selected[0]
-            st.markdown("### \ud83c\udfaf Selected Expense")
+        selected_df = pd.DataFrame(selected)
+
+        if not selected_df.empty:
+            row = selected_df.iloc[0]
+            st.markdown("### 🎯 Selected Expense")
             st.write(row)
 
-            c1, c2 = st.columns(2)
-            with c1:
-                if st.button("\u270f\ufe0f Edit Selected"):
-                    st.session_state.editing_expense = row
-                    st.session_state.current_screen = "inline_edit"
-                    st.rerun()
+            selected_action = st.radio("Choose Action", ["None", "Edit", "Delete"], horizontal=True)
 
-            with c2:
-                if st.button("\ud83d\uddd1\ufe0f Delete Selected"):
-                    run_async(delete_expense(int(row["Expense ID"])))
-                    st.success("Deleted successfully.")
-                    st.rerun()
+            if selected_action == "Edit":
+                st.session_state.editing_expense = row.to_dict()
+                st.session_state.current_screen = "inline_edit"
+                st.rerun()
+
+            elif selected_action == "Delete":
+                run_async(delete_expense(int(row["Expense ID"])))
+                st.success("Deleted successfully.")
+                st.rerun()
         else:
             st.info("Select a row to show Edit/Delete options.")
 
