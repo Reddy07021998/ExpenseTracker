@@ -415,11 +415,6 @@ if st.session_state.current_screen == "main_menu":
         st.session_state.current_screen = "login"
         st.rerun()
 
-# chat_expense screen:
-import re
-from datetime import datetime
-import streamlit as st
-
 # ---- CHATBOT SCREEN ----
 elif st.session_state.current_screen == "chat_expense":
     st.subheader("💬 Chat Assistant")
