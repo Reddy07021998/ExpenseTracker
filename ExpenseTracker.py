@@ -226,6 +226,10 @@ async def update_expense(expense_id, user_id, expense_name, amount, expense_date
         else:
             st.warning("No response data, but update request was sent.")
 
+    except Exception as e:
+        st.error(f"Exception during Edit: {e}")
+        logging.error(f"Exception editing expense_id={expense_id}: {e}")
+	
 # Function to delete an expense
 async def delete_expense(expense_id):
     try:
