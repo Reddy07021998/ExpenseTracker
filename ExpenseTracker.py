@@ -324,7 +324,7 @@ elif st.session_state.current_screen == "register":
 elif st.session_state.current_screen == "main_menu":
     st.title("Expense Tracker Dashboard")
 
-    # Subheader + three-dot action menu
+    # Actions + Header
     col_header, col_action = st.columns([9, 1], gap="small")
     col_header.subheader("💸 Expense Details")
     with col_action.expander("⋮", expanded=False):
@@ -337,14 +337,14 @@ elif st.session_state.current_screen == "main_menu":
             st.session_state.current_screen = "heatmap_view"
             st.rerun()
 
-    # Fetch categories and expenses
+    # Fetch data
     categories_df = run_async(fetch_categories())
     expenses_df = run_async(fetch_expenses(st.session_state.user_id))
 
     if not expenses_df.empty:
         expenses_df["Expense Date"] = pd.to_datetime(expenses_df["Expense Date"])
 
-        # Configure AG Grid
+        # Build grid
         gb = GridOptionsBuilder.from_dataframe(expenses_df)
         gb.configure_pagination(paginationAutoPageSize=False, paginationPageSize=10)
         gb.configure_default_column(editable=True, groupable=True)
@@ -356,52 +356,54 @@ elif st.session_state.current_screen == "main_menu":
             editable=True,
             type=["dateColumnFilter", "customDateTimeFormat"],
             custom_format_string="yyyy-MM-dd",
-            filterParams={"browserDatePicker": True}
+            filterParams={"browserDatePicker": True},
         )
         gb.configure_column("Category", editable=False, filter="agSetColumnFilter")
         grid_options = gb.build()
         grid_options["paginationPageSizeSelector"] = [10, 20, 50, 100]
 
-        # Display Grid (no auto-update logic)
+        # Render grid (edit in‐place, but we won’t auto‐save here)
         grid_response = AgGrid(
             expenses_df,
             gridOptions=grid_options,
-            update_mode=GridUpdateMode.VALUE_CHANGED,
+            update_mode=GridUpdateMode.SELECTION_CHANGED,   # fire on row select
             data_return_mode=DataReturnMode.AS_INPUT,
             fit_columns_on_grid_load=True,
             enable_enterprise_modules=True,
             allow_unsafe_jscode=True,
             height=400,
-            width='100%'
+            width="100%",
         )
 
-        # Row selection popup actions
+        # Show Edit/Delete buttons only when a row is selected
         selected = grid_response.get("selected_rows", [])
         if selected:
-            s = selected[0]
-            sel = {
-                "Expense ID": s["Expense ID"],
-                "Expense Name": s["Expense Name"],
-                "Amount": s["Amount"],
-                "Expense Date": s["Expense Date"],
-                "Category": s["Category"]
-            }
-            with st.expander("🎯 Selected Row Actions", expanded=True):
-                st.write(sel)
-                c1, c2 = st.columns(2)
-                with c1:
-                    if st.button("✏️ Edit Selected"):
-                        st.session_state.editing_expense = sel
-                        st.session_state.current_screen = "inline_edit"
-                        st.rerun()
-                with c2:
-                    if st.button("🗑️ Delete Selected"):
-                        run_async(delete_expense(int(sel["Expense ID"])))
-                        st.rerun()
-        else:
-            st.info("Select a row to see Edit/Delete options.")
+            row = selected[0]
+            st.markdown("### 🎯 Selected Expense")
+            st.write(row)
 
-    # Logout Button
+            c1, c2 = st.columns(2)
+            with c1:
+                if st.button("✏️ Edit Selected", key=f"edit_{row['Expense ID']}"):
+                    st.session_state.editing_expense = {
+                        "Expense ID": row["Expense ID"],
+                        "Expense Name": row["Expense Name"],
+                        "Amount": row["Amount"],
+                        "Expense Date": row["Expense Date"],
+                        "Category": row["Category"],
+                    }
+                    st.session_state.current_screen = "inline_edit"
+                    st.rerun()
+
+            with c2:
+                if st.button("🗑️ Delete Selected", key=f"del_{row['Expense ID']}"):
+                    run_async(delete_expense(int(row["Expense ID"])))
+                    st.success("Deleted successfully.")
+                    st.rerun()
+        else:
+            st.info("Select a row to show Edit/Delete options.")
+
+    # Logout
     if st.button("Logout"):
         st.session_state.user_id = None
         st.session_state.current_screen = "login"
