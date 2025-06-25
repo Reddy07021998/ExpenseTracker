@@ -320,7 +320,6 @@ elif st.session_state.current_screen == "register":
         st.rerun()
 
 # Main Menu Screen
-# Main Menu Screen
 elif st.session_state.current_screen == "main_menu":
     st.markdown("""
         <style>
@@ -412,24 +411,32 @@ elif st.session_state.current_screen == "main_menu":
             st.session_state.current_screen = "heatmap_view"
             st.rerun()
 
-    # Fetch data
+     # Fetch data
     categories_df = run_async(fetch_categories())
     expenses_df = run_async(fetch_expenses(st.session_state.user_id))
 
     if not expenses_df.empty:
         expenses_df["Expense Date"] = pd.to_datetime(expenses_df["Expense Date"])
 
+        # Build grid
         gb = GridOptionsBuilder.from_dataframe(expenses_df)
         gb.configure_pagination(paginationAutoPageSize=False, paginationPageSize=10)
         gb.configure_default_column(editable=True, groupable=True)
         gb.configure_selection("single", use_checkbox=True)
         gb.configure_column("Expense Name", editable=True)
         gb.configure_column("Amount", editable=True)
-        gb.configure_column("Expense Date", editable=True, type=["dateColumnFilter", "customDateTimeFormat"], custom_format_string="yyyy-MM-dd", filterParams={"browserDatePicker": True})
+        gb.configure_column(
+            "Expense Date",
+            editable=True,
+            type=["dateColumnFilter", "customDateTimeFormat"],
+            custom_format_string="yyyy-MM-dd",
+            filterParams={"browserDatePicker": True},
+        )
         gb.configure_column("Category", editable=False, filter="agSetColumnFilter")
         grid_options = gb.build()
         grid_options["paginationPageSizeSelector"] = [10, 20, 50, 100]
 
+        # Render grid
         grid_response = AgGrid(
             expenses_df,
             gridOptions=grid_options,
@@ -442,26 +449,31 @@ elif st.session_state.current_screen == "main_menu":
             width="100%",
         )
 
+        # Convert to DataFrame if needed and check selection
         selected = grid_response.get("selected_rows", [])
-        if selected and isinstance(selected[0], dict):
-            row = selected[0]
+        selected_df = pd.DataFrame(selected)
+
+        if not selected_df.empty:
+            row = selected_df.iloc[0]
             st.markdown("### 🎯 Selected Expense")
             st.write(row)
 
-            c1, c2 = st.columns(2)
-            with c1:
-                if st.button("✏️ Edit", key=f"edit_{row['Expense ID']}"):
-                    st.session_state.editing_expense = row
-                    st.session_state.current_screen = "inline_edit"
-                    st.rerun()
+            selected_action = st.radio("Choose Action", ["None", "Edit", "Delete"], horizontal=True)
 
-            with c2:
-                if st.button("🗑️ Delete", key=f"del_{row['Expense ID']}"):
-                    run_async(delete_expense(int(row["Expense ID"])))
-                    st.success("Deleted successfully.")
-                    st.rerun()
+            if selected_action == "Edit":
+                st.session_state.editing_expense = row.to_dict()
+                st.session_state.current_screen = "inline_edit"
+                st.rerun()
+
+            elif selected_action == "Delete":
+                run_async(delete_expense(int(row["Expense ID"])))
+                st.success("Deleted successfully.")
+                st.rerun()
         else:
             st.info("Select a row to show Edit/Delete options.")
+
+    else:
+        st.warning("No expense records found. Please add some.")
 
     # Logout
     if st.button("Logout"):
