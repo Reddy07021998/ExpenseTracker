@@ -12,8 +12,7 @@ import matplotlib
 import plotly
 from datetime import datetime
 from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode, DataReturnMode
-from your_supabase_module import run_async, fetch_categories, fetch_expenses, delete_expense, insert_expense  # Add your own imports here
-import re
+
 
 # Initialize Supabase client
 supabaseUrl = 'https://ofvcxjmgynwzngobgamv.supabase.co'
