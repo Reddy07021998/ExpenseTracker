@@ -323,91 +323,65 @@ elif st.session_state.current_screen == "register":
 elif st.session_state.current_screen == "main_menu":
     st.title("Expense Tracker Dashboard")
 
+    # Actions Dropdown
+    with st.expander("⋮ Actions", expanded=False):
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            if st.button("➕ Add Expense"):
+                st.session_state.current_screen = "add_expense"
+                st.rerun()
+        with col2:
+            if st.button("🔄 Refresh"):
+                st.rerun()
+        with col3:
+            if st.button("📊 Chart View"):
+                st.session_state.current_screen = "heatmap_view"
+                st.rerun()
+
+    # Fetch categories and expenses
     categories_df = run_async(fetch_categories())
-    if categories_df.empty:
-        st.write("No categories available.")
-        st.stop()
-    category_names = categories_df['category_name'].tolist()
-
-    col11, col12, col13 = st.columns([1, 1, 1])
-
-    with col11:
-        month_names = ["All", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-        month = st.selectbox("Select Month", month_names)
-        month_num = None if month == "All" else month_names.index(month)
-
-    with col12:
-        category = st.selectbox("Select Category", ["All"] + category_names)
-        category_id = None if category == "All" else categories_df[categories_df['category_name'] == category]['category_id'].values[0]
-
-    with col13:
-        current_year = datetime.now().year
-        year_range = list(range(2022, current_year + 2))
-        year_options = ["All"] + year_range
-        year = st.selectbox("Select Year", year_options)
-        year_num = None if year == "All" else int(year)
-
-    expenses_df = run_async(fetch_expenses(
-        st.session_state.user_id,
-        month_num=month_num,
-        year=year_num,
-        category_id=category_id
-    ))
-
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        if st.button("➕ Add Expense"):
-            st.session_state.current_screen = "add_expense"
-            st.rerun()
-    with col2:
-        if st.button("🔄 Refresh"):
-            st.rerun()
-    with col3:
-        if st.button("📊 Chart View"):
-            st.session_state.current_screen = "heatmap_view"
-            st.rerun()
+    expenses_df = run_async(fetch_expenses(st.session_state.user_id))
 
     if not expenses_df.empty:
-        st.subheader("💸 Expense Details")
-
-        if not pd.api.types.is_datetime64_any_dtype(expenses_df["Expense Date"]):
-            expenses_df["Expense Date"] = pd.to_datetime(expenses_df["Expense Date"])
-
+        expenses_df["Expense Date"] = pd.to_datetime(expenses_df["Expense Date"])
         original_df = expenses_df.copy()
 
+        # Configure AG Grid
         gb = GridOptionsBuilder.from_dataframe(expenses_df)
         gb.configure_pagination(paginationAutoPageSize=False, paginationPageSize=10)
         gb.configure_default_column(editable=True, groupable=True)
         gb.configure_selection("single", use_checkbox=True)
         gb.configure_column("Expense Name", editable=True)
         gb.configure_column("Amount", editable=True)
-        gb.configure_column("Expense Date", editable=True, type=["dateColumnFilter", "customDateTimeFormat"],
-                            custom_format_string="yyyy-MM-dd", filter_params={"browserDatePicker": True})
+        gb.configure_column(
+            "Expense Date",
+            editable=True,
+            type=["dateColumnFilter", "customDateTimeFormat"],
+            custom_format_string="yyyy-MM-dd",
+            filterParams={"browserDatePicker": True}
+        )
         gb.configure_column("Category", editable=False, filter="agSetColumnFilter")
         grid_options = gb.build()
 
-        # Display grid
+        # Display Grid
         grid_response = AgGrid(
             expenses_df,
             gridOptions=grid_options,
-            update_mode=GridUpdateMode.MODEL_CHANGED,
+            update_mode=GridUpdateMode.VALUE_CHANGED,  # auto save when editing ends
             data_return_mode=DataReturnMode.FILTERED_AND_SORTED,
             fit_columns_on_grid_load=True,
             enable_enterprise_modules=True,
             allow_unsafe_jscode=True,
             height=400,
-            width='100%'
+            width='100%',
+            reload_data=False
         )
 
+        # Handle Auto-Save on Edit
         updated_df = pd.DataFrame(grid_response["data"])
-        changed_indices = []
         for idx in range(len(expenses_df)):
             if not expenses_df.iloc[idx].equals(updated_df.iloc[idx]):
-                changed_indices.append(idx)
-
-        for idx in changed_indices:
-            updated = updated_df.iloc[idx]
-            try:
+                updated = updated_df.iloc[idx]
                 run_async(update_expense(
                     expense_id=int(updated["Expense ID"]),
                     user_id=int(st.session_state.user_id),
@@ -417,10 +391,8 @@ elif st.session_state.current_screen == "main_menu":
                     category_id=int(categories_df[categories_df["category_name"] == updated["Category"]]["category_id"].values[0])
                 ))
                 st.success(f"Row {idx + 1} updated successfully.")
-            except Exception as e:
-                st.error(f"Failed to update row {idx + 1}: {e}")
 
-        # Handle selection
+        # Row selection for manual actions
         selected_rows = grid_response.get("selected_rows", [])
         if selected_rows:
             selected = selected_rows[0]
@@ -446,8 +418,9 @@ elif st.session_state.current_screen == "main_menu":
                     run_async(delete_expense(int(selected_expense["Expense ID"])))
                     st.rerun()
         else:
-            st.info("Select an expense row to edit or delete.")
+            st.info("Select a row to view options.")
 
+    # Logout button
     if st.button("Logout"):
         st.session_state.user_id = None
         st.session_state.current_screen = "login"
