@@ -418,41 +418,56 @@ if st.session_state.current_screen == "main_menu":
         st.rerun()
 
 # chat_expense screen:
+import re
+from datetime import datetime
+import streamlit as st
+
+# ---- CHATBOT SCREEN ----
 elif st.session_state.current_screen == "chat_expense":
     st.subheader("💬 Chat Assistant")
-    st.info("Say: 'I spent 200 on groceries today' or type manually.")
+    st.info("🎤 Try saying or typing: 'I spent 250 on groceries today'")
 
-    # 1. TEXT input option
-    user_input = st.text_input("Enter your expense command (optional):")
+    # --- VOICE INPUT via Web Speech API ---
+    st.markdown("""
+        <script>
+        var recognition;
+        function startDictation() {
+            if (!('webkitSpeechRecognition' in window)) {
+                alert("Your browser doesn't support Speech Recognition. Try Chrome.");
+                return;
+            }
+            recognition = new webkitSpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = "en-IN";
 
-    # 2. VOICE input handler
-    class AudioProcessor(AudioProcessorBase):
-        def recv(self, frame: av.AudioFrame) -> av.AudioFrame:
-            audio_data = frame.to_ndarray()
-            r = sr.Recognizer()
-            with sr.AudioData(audio_data.tobytes(), frame.sample_rate, 2) as source:
-                try:
-                    text = r.recognize_google(source)
-                    st.session_state.voice_command = text
-                except sr.UnknownValueError:
-                    st.warning("Could not understand audio")
-                except sr.RequestError as e:
-                    st.error(f"Speech recognition error: {e}")
-            return frame
+            recognition.onresult = function(e) {
+                document.getElementById('speechText').value = e.results[0][0].transcript;
+                document.getElementById('speechForm').dispatchEvent(new Event('submit'));
+                recognition.stop();
+            };
+            recognition.onerror = function(e) {
+                alert("Error: " + e.error);
+                recognition.stop();
+            };
 
-    webrtc_streamer(
-        key="chat-voice",
-        audio_processor_factory=AudioProcessor,
-        media_stream_constraints={"audio": True, "video": False},
-        async_processing=True,
-    )
+            recognition.start();
+        }
+        </script>
 
-    # Choose voice or text
-    final_input = st.session_state.get("voice_command", user_input)
+        <form id="speechForm" action="" method="get">
+            <textarea id="speechText" name="speechText" rows="2" cols="60" placeholder="Say something or type..."></textarea><br>
+            <input type="button" value="🎤 Speak Now" onclick="startDictation();">
+        </form>
+    """, unsafe_allow_html=True)
 
-    # Expense parsing logic
+    # --- Get input from voice or text box ---
+    speech_input = st.query_params.get("speechText", "")
+    user_input = st.text_input("📝 Edit or type your command:", value=speech_input)
+
+    # --- Simple expense parser using regex ---
     def parse_expense(text):
-        pattern = r"spent\\s+(\\d+(?:\\.\\d{1,2})?)\\s+(?:on|for)\\s+(\\w+)(?:\\s+on\\s+(\\d{4}-\\d{2}-\\d{2}))?"
+        pattern = r"spent\s+(\d+(?:\.\d{1,2})?)\s+(?:on|for)\s+(\w+)(?:\s+on\s+(\d{4}-\d{2}-\d{2}))?"
         match = re.search(pattern, text.lower())
         if match:
             amount = float(match.group(1))
@@ -467,28 +482,29 @@ elif st.session_state.current_screen == "chat_expense":
             }
         return None
 
+    # --- Submit handler ---
     if st.button("Submit"):
-        if final_input:
-            parsed = parse_expense(final_input)
+        if user_input:
+            parsed = parse_expense(user_input)
             if parsed:
                 run_async(add_expense(
                     parsed["user_id"],
                     parsed["Expense Name"],
                     parsed["Amount"],
                     parsed["Expense Date"],
-                    category_id=1  # 🚨 You may map actual category ID from category name here
+                    category_id=1  # ⚠️ Replace this with actual category ID lookup logic
                 ))
-                st.success(f"✅ Expense added: ₹{parsed['Amount']} for {parsed['Category']} on {parsed['Expense Date']}")
-                st.session_state.voice_command = ''  # reset
+                st.success(f"✅ Added ₹{parsed['Amount']} for {parsed['Category']} on {parsed['Expense Date']}")
             else:
-                st.error("❌ Couldn't parse the input. Try again.")
+                st.error("❌ Couldn't understand your input. Try again like 'I spent 200 on travel today'.")
         else:
-            st.warning("Please speak or enter a command.")
+            st.warning("Please speak or type your expense.")
 
+    # --- Back to main menu ---
     if st.button("⬅️ Back to Dashboard"):
         st.session_state.current_screen = "main_menu"
         st.rerun()
-
+	
 # Heatmap Screen
 elif st.session_state.current_screen == "heatmap_view":
     set_background(login_img)
