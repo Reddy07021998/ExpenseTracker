@@ -326,15 +326,73 @@ elif st.session_state.current_screen == "main_menu":
     # Actions + Header
     col_header, col_action = st.columns([9, 1], gap="small")
     col_header.subheader("💸 Expense Details")
-    with col_action.expander("⋮", expanded=False):
-        if st.button("➕ Add Expense"):
+
+    # Custom three-dot dropdown menu (inside col_action)
+    with col_action:
+        st.markdown("""
+            <style>
+                .menu-wrapper {
+                    position: relative;
+                    display: inline-block;
+                    float: right;
+                    z-index: 999;
+                }
+                .three-dots {
+                    background: none;
+                    border: none;
+                    font-size: 22px;
+                    cursor: pointer;
+                }
+                .menu-content {
+                    display: none;
+                    position: absolute;
+                    right: 0;
+                    background-color: #fff;
+                    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+                    padding: 5px 0;
+                    border-radius: 8px;
+                    min-width: 140px;
+                }
+                .menu-wrapper:hover .menu-content {
+                    display: block;
+                }
+                .menu-item {
+                    padding: 10px 20px;
+                    cursor: pointer;
+                    font-size: 14px;
+                    color: #000;
+                    background: none;
+                    border: none;
+                    width: 100%;
+                    text-align: left;
+                }
+                .menu-item:hover {
+                    background-color: #f2f2f2;
+                }
+            </style>
+
+            <div class="menu-wrapper">
+                <button class="three-dots">⋮</button>
+                <div class="menu-content">
+                    <form method="post">
+                        <button name="menu_action" value="add_expense" class="menu-item" type="submit">Add Expense</button>
+                        <button name="menu_action" value="refresh" class="menu-item" type="submit">Refresh</button>
+                        <button name="menu_action" value="chart_view" class="menu-item" type="submit">Chart View</button>
+                    </form>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+
+    # Menu Action Handler (handle before rendering)
+    menu_action = st.experimental_get_query_params().get("menu_action", [None])[0]
+    if menu_action:
+        if menu_action == "add_expense":
             st.session_state.current_screen = "add_expense"
-            st.rerun()
-        if st.button("🔄 Refresh"):
-            st.rerun()
-        if st.button("📊 Chart View"):
+        elif menu_action == "refresh":
+            pass  # Just rerun below
+        elif menu_action == "chart_view":
             st.session_state.current_screen = "heatmap_view"
-            st.rerun()
+        st.rerun()
 
     # Fetch data
     categories_df = run_async(fetch_categories())
@@ -365,7 +423,7 @@ elif st.session_state.current_screen == "main_menu":
         grid_response = AgGrid(
             expenses_df,
             gridOptions=grid_options,
-            update_mode=GridUpdateMode.SELECTION_CHANGED,   # fire on row select
+            update_mode=GridUpdateMode.SELECTION_CHANGED,
             data_return_mode=DataReturnMode.AS_INPUT,
             fit_columns_on_grid_load=True,
             enable_enterprise_modules=True,
@@ -377,7 +435,6 @@ elif st.session_state.current_screen == "main_menu":
         # Show Edit/Delete buttons only when a row is selected
         selected = grid_response.get("selected_rows", [])
 
-        # Defensive check
         if isinstance(selected, list) and len(selected) > 0 and isinstance(selected[0], dict):
             row = selected[0]
             st.markdown("### 🎯 Selected Expense")
