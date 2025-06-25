@@ -12,9 +12,7 @@ import matplotlib
 import plotly
 from datetime import datetime
 from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode, DataReturnMode
-from streamlit_webrtc import webrtc_streamer, AudioProcessorBase
-import speech_recognition as sr
-import av
+import re
 
 # Initialize Supabase client
 supabaseUrl = 'https://ofvcxjmgynwzngobgamv.supabase.co'
