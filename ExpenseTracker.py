@@ -12,7 +12,9 @@ import matplotlib
 import plotly
 from datetime import datetime
 from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode, DataReturnMode
-
+from streamlit_webrtc import webrtc_streamer, AudioProcessorBase
+import speech_recognition as sr
+import av
 
 # Initialize Supabase client
 supabaseUrl = 'https://ofvcxjmgynwzngobgamv.supabase.co'
@@ -415,15 +417,42 @@ if st.session_state.current_screen == "main_menu":
         st.session_state.current_screen = "login"
         st.rerun()
 
-# --- CHATBOT SCREEN (Working) ---
+# chat_expense screen:
 elif st.session_state.current_screen == "chat_expense":
     st.subheader("💬 Chat Assistant")
-    st.info("Try commands like: 'I spent 200 on groceries today' or 'Spent 150 for transport on 2024-06-01'")
+    st.info("Say: 'I spent 200 on groceries today' or type manually.")
 
-    user_input = st.text_input("Enter your expense command:")
+    # 1. TEXT input option
+    user_input = st.text_input("Enter your expense command (optional):")
 
+    # 2. VOICE input handler
+    class AudioProcessor(AudioProcessorBase):
+        def recv(self, frame: av.AudioFrame) -> av.AudioFrame:
+            audio_data = frame.to_ndarray()
+            r = sr.Recognizer()
+            with sr.AudioData(audio_data.tobytes(), frame.sample_rate, 2) as source:
+                try:
+                    text = r.recognize_google(source)
+                    st.session_state.voice_command = text
+                except sr.UnknownValueError:
+                    st.warning("Could not understand audio")
+                except sr.RequestError as e:
+                    st.error(f"Speech recognition error: {e}")
+            return frame
+
+    webrtc_streamer(
+        key="chat-voice",
+        audio_processor_factory=AudioProcessor,
+        media_stream_constraints={"audio": True, "video": False},
+        async_processing=True,
+    )
+
+    # Choose voice or text
+    final_input = st.session_state.get("voice_command", user_input)
+
+    # Expense parsing logic
     def parse_expense(text):
-        pattern = r"spent\s+(\d+(?:\.\d{1,2})?)\s+(?:on|for)\s+(\w+)(?:\s+on\s+(\d{4}-\d{2}-\d{2}))?"
+        pattern = r"spent\\s+(\\d+(?:\\.\\d{1,2})?)\\s+(?:on|for)\\s+(\\w+)(?:\\s+on\\s+(\\d{4}-\\d{2}-\\d{2}))?"
         match = re.search(pattern, text.lower())
         if match:
             amount = float(match.group(1))
@@ -438,13 +467,23 @@ elif st.session_state.current_screen == "chat_expense":
             }
         return None
 
-    if st.button("Submit") and user_input:
-        parsed = parse_expense(user_input)
-        if parsed:
-            run_async(insert_expense(parsed))
-            st.success(f"✅ Expense added: ₹{parsed['Amount']} for {parsed['Category']} on {parsed['Expense Date']}")
+    if st.button("Submit"):
+        if final_input:
+            parsed = parse_expense(final_input)
+            if parsed:
+                run_async(add_expense(
+                    parsed["user_id"],
+                    parsed["Expense Name"],
+                    parsed["Amount"],
+                    parsed["Expense Date"],
+                    category_id=1  # 🚨 You may map actual category ID from category name here
+                ))
+                st.success(f"✅ Expense added: ₹{parsed['Amount']} for {parsed['Category']} on {parsed['Expense Date']}")
+                st.session_state.voice_command = ''  # reset
+            else:
+                st.error("❌ Couldn't parse the input. Try again.")
         else:
-            st.error("❌ Couldn't understand the input. Please try again with the format like 'I spent 200 on food today'.")
+            st.warning("Please speak or enter a command.")
 
     if st.button("⬅️ Back to Dashboard"):
         st.session_state.current_screen = "main_menu"
