@@ -327,95 +327,17 @@ elif st.session_state.current_screen == "main_menu":
     col_header, col_action = st.columns([9, 1], gap="small")
     col_header.subheader("💸 Expense Details")
 
-    # Dropdown menu in col_action
     with col_action:
-        st.markdown("""
-            <style>
-                .menu-wrapper {
-                    position: relative;
-                    display: inline-block;
-                    float: right;
-                    z-index: 1000;
-                }
+        action = st.selectbox("\u22ee", ["Select Action", "Add Expense", "Refresh", "Chart View"])
 
-                .three-dots {
-                    background: none;
-                    border: none;
-                    font-size: 24px;
-                    cursor: pointer;
-                    color: #444;
-                }
-
-                .menu-content {
-                    display: none;
-                    position: absolute;
-                    top: 30px;
-                    right: 0;
-                    background-color: #ffffff;
-                    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
-                    padding: 5px 0;
-                    border-radius: 8px;
-                    min-width: 160px;
-                    z-index: 1001;
-                }
-
-                .menu-item {
-                    padding: 10px 20px;
-                    cursor: pointer;
-                    font-size: 14px;
-                    color: #333;
-                    background: none;
-                    border: none;
-                    width: 100%;
-                    text-align: left;
-                }
-
-                .menu-item:hover {
-                    background-color: #f0f0f0;
-                }
-            </style>
-
-            <script>
-                function toggleDropdown() {
-                    var menu = document.getElementById("menu-content");
-                    if (menu.style.display === "block") {
-                        menu.style.display = "none";
-                    } else {
-                        menu.style.display = "block";
-                    }
-                }
-
-                document.addEventListener('click', function(event) {
-                    var menu = document.getElementById("menu-content");
-                    var button = document.getElementById("dots-button");
-                    if (!button.contains(event.target) && !menu.contains(event.target)) {
-                        menu.style.display = "none";
-                    }
-                });
-            </script>
-
-            <div class="menu-wrapper">
-                <button class="three-dots" id="dots-button" onclick="toggleDropdown()">\u22ee</button>
-                <div class="menu-content" id="menu-content">
-                    <form method="post">
-                        <button name="menu_action" value="add_expense" class="menu-item" type="submit">Add Expense</button>
-                        <button name="menu_action" value="refresh" class="menu-item" type="submit">Refresh</button>
-                        <button name="menu_action" value="chart_view" class="menu-item" type="submit">Chart View</button>
-                    </form>
-                </div>
-            </div>
-        """, unsafe_allow_html=True)
-
-    # Menu Action Handler
-    menu_action = st.query_params.get("menu_action")
-    if menu_action:
-        if menu_action == "add_expense":
-            st.session_state.current_screen = "add_expense"
-        elif menu_action == "refresh":
-            pass
-        elif menu_action == "chart_view":
-            st.session_state.current_screen = "heatmap_view"
-        st.query_params.clear()
+    # Handle Actions
+    if action == "Add Expense":
+        st.session_state.current_screen = "add_expense"
+        st.rerun()
+    elif action == "Refresh":
+        st.rerun()
+    elif action == "Chart View":
+        st.session_state.current_screen = "heatmap_view"
         st.rerun()
 
     # Fetch data
@@ -425,20 +347,25 @@ elif st.session_state.current_screen == "main_menu":
     if not expenses_df.empty:
         expenses_df["Expense Date"] = pd.to_datetime(expenses_df["Expense Date"])
 
+        # Build grid
         gb = GridOptionsBuilder.from_dataframe(expenses_df)
         gb.configure_pagination(paginationAutoPageSize=False, paginationPageSize=10)
         gb.configure_default_column(editable=True, groupable=True)
         gb.configure_selection("single", use_checkbox=True)
         gb.configure_column("Expense Name", editable=True)
         gb.configure_column("Amount", editable=True)
-        gb.configure_column("Expense Date", editable=True,
-                            type=["dateColumnFilter", "customDateTimeFormat"],
-                            custom_format_string="yyyy-MM-dd",
-                            filterParams={"browserDatePicker": True})
+        gb.configure_column(
+            "Expense Date",
+            editable=True,
+            type=["dateColumnFilter", "customDateTimeFormat"],
+            custom_format_string="yyyy-MM-dd",
+            filterParams={"browserDatePicker": True},
+        )
         gb.configure_column("Category", editable=False, filter="agSetColumnFilter")
         grid_options = gb.build()
         grid_options["paginationPageSizeSelector"] = [10, 20, 50, 100]
 
+        # Render grid
         grid_response = AgGrid(
             expenses_df,
             gridOptions=grid_options,
@@ -451,32 +378,30 @@ elif st.session_state.current_screen == "main_menu":
             width="100%",
         )
 
+        # Handle selected row
         selected = grid_response.get("selected_rows", [])
-        if isinstance(selected, list) and len(selected) > 0 and isinstance(selected[0], dict):
+        if selected and isinstance(selected[0], dict):
             row = selected[0]
             st.markdown("### \ud83c\udfaf Selected Expense")
             st.write(row)
 
             c1, c2 = st.columns(2)
             with c1:
-                if st.button("\u270f\ufe0f Edit Selected", key=f"edit_{row['Expense ID']}"):
-                    st.session_state.editing_expense = {
-                        "Expense ID": row["Expense ID"],
-                        "Expense Name": row["Expense Name"],
-                        "Amount": row["Amount"],
-                        "Expense Date": row["Expense Date"],
-                        "Category": row["Category"],
-                    }
+                if st.button("\u270f\ufe0f Edit Selected"):
+                    st.session_state.editing_expense = row
                     st.session_state.current_screen = "inline_edit"
                     st.rerun()
 
             with c2:
-                if st.button("\ud83d\uddd1\ufe0f Delete Selected", key=f"del_{row['Expense ID']}"):
+                if st.button("\ud83d\uddd1\ufe0f Delete Selected"):
                     run_async(delete_expense(int(row["Expense ID"])))
                     st.success("Deleted successfully.")
                     st.rerun()
         else:
             st.info("Select a row to show Edit/Delete options.")
+
+    else:
+        st.warning("No expense records found. Please add some.")
 
     # Logout
     if st.button("Logout"):
