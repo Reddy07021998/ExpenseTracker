@@ -320,7 +320,6 @@ elif st.session_state.current_screen == "register":
         st.rerun()
 
 # Main Menu Screen
-# Main Menu Screen
 elif st.session_state.current_screen == "main_menu":
     st.title("Expense Tracker Dashboard")
 
@@ -377,7 +376,7 @@ elif st.session_state.current_screen == "main_menu":
 
         # Show Edit/Delete buttons only when a row is selected
         selected = grid_response.get("selected_rows", [])
-        if selected:
+        if selected != []:
             row = selected[0]
             st.markdown("### 🎯 Selected Expense")
             st.write(row)
