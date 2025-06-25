@@ -327,7 +327,7 @@ elif st.session_state.current_screen == "main_menu":
     col_header, col_action = st.columns([9, 1], gap="small")
     col_header.subheader("💸 Expense Details")
 
-    # Custom three-dot dropdown menu (inside col_action)
+    # Dropdown menu in col_action
     with col_action:
         st.markdown("""
             <style>
@@ -337,12 +337,14 @@ elif st.session_state.current_screen == "main_menu":
                     float: right;
                     z-index: 999;
                 }
+
                 .three-dots {
                     background: none;
                     border: none;
-                    font-size: 22px;
+                    font-size: 24px;
                     cursor: pointer;
                 }
+
                 .menu-content {
                     display: none;
                     position: absolute;
@@ -353,9 +355,7 @@ elif st.session_state.current_screen == "main_menu":
                     border-radius: 8px;
                     min-width: 140px;
                 }
-                .menu-wrapper:hover .menu-content {
-                    display: block;
-                }
+
                 .menu-item {
                     padding: 10px 20px;
                     cursor: pointer;
@@ -366,14 +366,30 @@ elif st.session_state.current_screen == "main_menu":
                     width: 100%;
                     text-align: left;
                 }
+
                 .menu-item:hover {
                     background-color: #f2f2f2;
                 }
             </style>
 
+            <script>
+                function toggleDropdown() {
+                    var menu = document.getElementById("menu-content");
+                    menu.style.display = menu.style.display === "block" ? "none" : "block";
+                }
+
+                document.addEventListener('click', function(event) {
+                    var menu = document.getElementById("menu-content");
+                    var button = document.getElementById("dots-button");
+                    if (!button.contains(event.target) && !menu.contains(event.target)) {
+                        menu.style.display = "none";
+                    }
+                });
+            </script>
+
             <div class="menu-wrapper">
-                <button class="three-dots">⋮</button>
-                <div class="menu-content">
+                <button class="three-dots" id="dots-button" onclick="toggleDropdown()">⋮</button>
+                <div class="menu-content" id="menu-content">
                     <form method="post">
                         <button name="menu_action" value="add_expense" class="menu-item" type="submit">Add Expense</button>
                         <button name="menu_action" value="refresh" class="menu-item" type="submit">Refresh</button>
@@ -383,15 +399,16 @@ elif st.session_state.current_screen == "main_menu":
             </div>
         """, unsafe_allow_html=True)
 
-    # Menu Action Handler (handle before rendering)
-    menu_action = st.query_params.get("menu_action", [None])[0]
+    # Menu Action Handler
+    menu_action = st.query_params.get("menu_action")
     if menu_action:
         if menu_action == "add_expense":
             st.session_state.current_screen = "add_expense"
         elif menu_action == "refresh":
-            pass  # Just rerun below
+            pass  # Just re-renders
         elif menu_action == "chart_view":
             st.session_state.current_screen = "heatmap_view"
+        st.query_params.clear()
         st.rerun()
 
     # Fetch data
@@ -419,7 +436,7 @@ elif st.session_state.current_screen == "main_menu":
         grid_options = gb.build()
         grid_options["paginationPageSizeSelector"] = [10, 20, 50, 100]
 
-        # Render grid (edit in‐place, but we won’t auto‐save here)
+        # Render grid
         grid_response = AgGrid(
             expenses_df,
             gridOptions=grid_options,
@@ -432,9 +449,8 @@ elif st.session_state.current_screen == "main_menu":
             width="100%",
         )
 
-        # Show Edit/Delete buttons only when a row is selected
+        # Handle selected row
         selected = grid_response.get("selected_rows", [])
-
         if isinstance(selected, list) and len(selected) > 0 and isinstance(selected[0], dict):
             row = selected[0]
             st.markdown("### 🎯 Selected Expense")
