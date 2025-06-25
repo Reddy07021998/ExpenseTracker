@@ -351,38 +351,36 @@ elif st.session_state.current_screen == "main_menu":
 
         # Configure AG Grid
         gb = GridOptionsBuilder.from_dataframe(expenses_df)
-        # Configure AG Grid
-	gb = GridOptionsBuilder.from_dataframe(expenses_df)
-	gb.configure_pagination(paginationAutoPageSize=False, paginationPageSize=10)
-	gb.configure_default_column(editable=True, groupable=True)
-	gb.configure_selection("single", use_checkbox=True)
-	gb.configure_column("Expense Name", editable=True)
-	gb.configure_column("Amount", editable=True)
-	gb.configure_column(
-	    "Expense Date",
-	    editable=True,
-	    type=["dateColumnFilter", "customDateTimeFormat"],
-	    custom_format_string="yyyy-MM-dd",
-	    filterParams={"browserDatePicker": True}
-	)
-	gb.configure_column("Category", editable=False, filter="agSetColumnFilter")
-	grid_options = gb.build()
-	
-	# Manually add the selector options
-	grid_options["paginationPageSizeSelector"] = [10, 20, 50, 100]
-	
-	# Display Grid
-	grid_response = AgGrid(
-	    expenses_df,
-	    gridOptions=grid_options,
-	    update_mode=GridUpdateMode.VALUE_CHANGED,
-	    data_return_mode=DataReturnMode.FILTERED_AND_SORTED,
-	    fit_columns_on_grid_load=True,
-	    enable_enterprise_modules=True,
-	    allow_unsafe_jscode=True,
-	    height=400,
-	    width='100%'
-	)
+        gb.configure_pagination(paginationAutoPageSize=False, paginationPageSize=10)
+        gb.configure_default_column(editable=True, groupable=True)
+        gb.configure_selection("single", use_checkbox=True)
+        gb.configure_column("Expense Name", editable=True)
+        gb.configure_column("Amount", editable=True)
+        gb.configure_column(
+            "Expense Date",
+            editable=True,
+            type=["dateColumnFilter", "customDateTimeFormat"],
+            custom_format_string="yyyy-MM-dd",
+            filterParams={"browserDatePicker": True}
+        )
+        gb.configure_column("Category", editable=False, filter="agSetColumnFilter")
+        grid_options = gb.build()
+
+        # Manually add page-size selector options
+        grid_options["paginationPageSizeSelector"] = [10, 20, 50, 100]
+
+        # Display Grid
+        grid_response = AgGrid(
+            expenses_df,
+            gridOptions=grid_options,
+            update_mode=GridUpdateMode.VALUE_CHANGED,
+            data_return_mode=DataReturnMode.FILTERED_AND_SORTED,
+            fit_columns_on_grid_load=True,
+            enable_enterprise_modules=True,
+            allow_unsafe_jscode=True,
+            height=400,
+            width='100%'
+        )
 
         # Auto-save only changed rows
         updated_df = pd.DataFrame(grid_response["data"])
@@ -390,7 +388,6 @@ elif st.session_state.current_screen == "main_menu":
             idx for idx in range(len(original_df))
             if not original_df.iloc[idx].equals(pd.Series(updated_df.iloc[idx]))
         ]
-
         if changed_indices:
             for idx in changed_indices:
                 updated = updated_df.iloc[idx]
@@ -401,7 +398,11 @@ elif st.session_state.current_screen == "main_menu":
                         expense_name=updated["Expense Name"],
                         amount=float(updated["Amount"]),
                         expense_date=pd.to_datetime(updated["Expense Date"]).isoformat(),
-                        category_id=int(categories_df[categories_df["category_name"] == updated["Category"]]["category_id"].values[0])
+                        category_id=int(
+                            categories_df[
+                                categories_df["category_name"] == updated["Category"]
+                            ]["category_id"].values[0]
+                        )
                     ))
                 except Exception as e:
                     st.error(f"Error updating row {idx + 1}: {e}")
@@ -418,7 +419,6 @@ elif st.session_state.current_screen == "main_menu":
                 "Expense Date": selected["Expense Date"],
                 "Category": selected["Category"]
             }
-
             with st.expander("🎯 Selected Row Actions", expanded=True):
                 st.write(selected_expense)
                 col1, col2 = st.columns(2)
