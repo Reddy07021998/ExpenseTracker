@@ -407,6 +407,7 @@ elif st.session_state.current_screen == "main_menu":
         st.session_state.current_screen = "login"
         st.rerun()
 
+
 # Heatmap Screen
 elif st.session_state.current_screen == "heatmap_view":
     set_background(login_img)
