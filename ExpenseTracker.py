@@ -12,6 +12,8 @@ import matplotlib
 import plotly
 from datetime import datetime
 from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode, DataReturnMode
+from your_supabase_module import run_async, fetch_categories, fetch_expenses, delete_expense, insert_expense  # Add your own imports here
+import re
 
 # Initialize Supabase client
 supabaseUrl = 'https://ofvcxjmgynwzngobgamv.supabase.co'
@@ -319,106 +321,38 @@ elif st.session_state.current_screen == "register":
         st.session_state.current_screen = "login"
         st.rerun()
 
-# Main Menu Screen
-elif st.session_state.current_screen == "main_menu":
-    st.markdown("""
-        <style>
-            /* Remove right scroll bar */
-            ::-webkit-scrollbar {
-                width: 0px;
-                background: transparent;
-            }
+# --- MAIN MENU SCREEN ---
+if st.session_state.current_screen == "main_menu":
+    st.title("Expense Tracker Dashboard")
 
-            /* Floating profile image button */
-            .profile-button {
-                position: absolute;
-                top: 20px;
-                right: 20px;
-                width: 40px;
-                height: 40px;
-                border-radius: 50%;
-                overflow: hidden;
-                border: 2px solid #ccc;
-                cursor: pointer;
-            }
-
-            .profile-button img {
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-            }
-
-            .profile-menu {
-                position: absolute;
-                top: 70px;
-                right: 20px;
-                background: white;
-                box-shadow: 0 0 10px rgba(0,0,0,0.1);
-                border-radius: 10px;
-                padding: 10px;
-                z-index: 999;
-                width: 200px;
-            }
-        </style>
-    """, unsafe_allow_html=True)
-
-    # Profile Dropdown Toggle
-    if "show_profile" not in st.session_state:
-        st.session_state.show_profile = False
-
-    col1, col2 = st.columns([9, 1])
-    with col2:
-        if st.button("", key="profile_click", help="Profile", use_container_width=True):
-            st.session_state.show_profile = not st.session_state.show_profile
-        st.markdown(
-            f"<div class='profile-button'><img src='https://i.pravatar.cc/300?u={st.session_state.user_id}'></div>",
-            unsafe_allow_html=True,
-        )
-
-    if st.session_state.show_profile:
-        st.markdown(f"""
-            <div class='profile-menu'>
-                <b>{st.session_state.user_name}</b><br>
-                <small>{st.session_state.user_email}</small><br><br>
-                <form method='post'>
-                    <button type='submit' name='logout_btn' style='background-color: red; color: white; width: 100%; border: none; padding: 8px; border-radius: 6px;'>Logout</button>
-                </form>
-            </div>
-        """, unsafe_allow_html=True)
-
-    # Logout
-    if st.session_state.get("logout_btn") is not None:
-        st.session_state.user_id = None
-        st.session_state.current_screen = "login"
-        st.rerun()
-
-    st.markdown("""
-        <h1 style='font-size: 36px; margin-bottom: 0;'>Expense Tracker Dashboard</h1>
-        <h3 style='margin-top: 5px;'>💸 Expense Details</h3>
-    """, unsafe_allow_html=True)
+    st.subheader("💸 Expense Details")
 
     # Action Buttons
-    colA, colB, colC = st.columns([1, 1, 1])
-    with colA:
+    c1, c2, c3, c4 = st.columns([1, 1, 1, 1])
+    with c1:
         if st.button("➕ Add Expense"):
             st.session_state.current_screen = "add_expense"
             st.rerun()
-    with colB:
+    with c2:
         if st.button("🔄 Refresh"):
             st.rerun()
-    with colC:
+    with c3:
         if st.button("📊 Chart View"):
             st.session_state.current_screen = "heatmap_view"
             st.rerun()
+    with c4:
+        if st.button("💬 Chat Assistant"):
+            st.session_state.current_screen = "chat_expense"
+            st.rerun()
 
-     # Fetch data
+    # Fetch categories and expenses
     categories_df = run_async(fetch_categories())
     expenses_df = run_async(fetch_expenses(st.session_state.user_id))
 
     if not expenses_df.empty:
         expenses_df["Expense Date"] = pd.to_datetime(expenses_df["Expense Date"])
 
-        # Build grid
+        # Configure AgGrid
         gb = GridOptionsBuilder.from_dataframe(expenses_df)
         gb.configure_pagination(paginationAutoPageSize=False, paginationPageSize=10)
         gb.configure_default_column(editable=True, groupable=True)
@@ -436,7 +370,7 @@ elif st.session_state.current_screen == "main_menu":
         grid_options = gb.build()
         grid_options["paginationPageSizeSelector"] = [10, 20, 50, 100]
 
-        # Render grid
+        # Render AgGrid
         grid_response = AgGrid(
             expenses_df,
             gridOptions=grid_options,
@@ -449,36 +383,72 @@ elif st.session_state.current_screen == "main_menu":
             width="100%",
         )
 
-        # Convert to DataFrame if needed and check selection
         selected = grid_response.get("selected_rows", [])
-        selected_df = pd.DataFrame(selected)
-
-        if not selected_df.empty:
-            row = selected_df.iloc[0]
+        if isinstance(selected, list) and len(selected) > 0 and isinstance(selected[0], dict):
+            row = selected[0]
             st.markdown("### 🎯 Selected Expense")
             st.write(row)
 
-            selected_action = st.radio("Choose Action", ["None", "Edit", "Delete"], horizontal=True)
+            c1, c2 = st.columns(2)
+            with c1:
+                if st.button("✏️ Edit This", key=f"edit_{row['Expense ID']}"):
+                    st.session_state.editing_expense = {
+                        "Expense ID": row["Expense ID"],
+                        "Expense Name": row["Expense Name"],
+                        "Amount": row["Amount"],
+                        "Expense Date": row["Expense Date"],
+                        "Category": row["Category"],
+                    }
+                    st.session_state.current_screen = "inline_edit"
+                    st.rerun()
 
-            if selected_action == "Edit":
-                st.session_state.editing_expense = row.to_dict()
-                st.session_state.current_screen = "inline_edit"
-                st.rerun()
-
-            elif selected_action == "Delete":
-                run_async(delete_expense(int(row["Expense ID"])))
-                st.success("Deleted successfully.")
-                st.rerun()
+            with c2:
+                if st.button("🗑️ Delete This", key=f"delete_{row['Expense ID']}"):
+                    run_async(delete_expense(int(row["Expense ID"])))
+                    st.success("Deleted successfully.")
+                    st.rerun()
         else:
-            st.info("Select a row to show Edit/Delete options.")
+            st.info("Select a row above to Edit or Delete an expense.")
 
-    else:
-        st.warning("No expense records found. Please add some.")
-
-    # Logout
+    # Logout button
     if st.button("Logout"):
         st.session_state.user_id = None
         st.session_state.current_screen = "login"
+        st.rerun()
+
+# --- CHATBOT SCREEN (Working) ---
+elif st.session_state.current_screen == "chat_expense":
+    st.subheader("💬 Chat Assistant")
+    st.info("Try commands like: 'I spent 200 on groceries today' or 'Spent 150 for transport on 2024-06-01'")
+
+    user_input = st.text_input("Enter your expense command:")
+
+    def parse_expense(text):
+        pattern = r"spent\s+(\d+(?:\.\d{1,2})?)\s+(?:on|for)\s+(\w+)(?:\s+on\s+(\d{4}-\d{2}-\d{2}))?"
+        match = re.search(pattern, text.lower())
+        if match:
+            amount = float(match.group(1))
+            category = match.group(2).capitalize()
+            date = match.group(3) if match.group(3) else datetime.today().strftime('%Y-%m-%d')
+            return {
+                "user_id": st.session_state.user_id,
+                "Expense Name": f"Chat Entry - {category}",
+                "Amount": amount,
+                "Expense Date": date,
+                "Category": category
+            }
+        return None
+
+    if st.button("Submit") and user_input:
+        parsed = parse_expense(user_input)
+        if parsed:
+            run_async(insert_expense(parsed))
+            st.success(f"✅ Expense added: ₹{parsed['Amount']} for {parsed['Category']} on {parsed['Expense Date']}")
+        else:
+            st.error("❌ Couldn't understand the input. Please try again with the format like 'I spent 200 on food today'.")
+
+    if st.button("⬅️ Back to Dashboard"):
+        st.session_state.current_screen = "main_menu"
         st.rerun()
 
 # Heatmap Screen
