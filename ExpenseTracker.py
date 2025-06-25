@@ -377,31 +377,32 @@ elif st.session_state.current_screen == "main_menu":
         # Show Edit/Delete buttons only when a row is selected
         selected = grid_response.get("selected_rows", [])
 
-        if not pd.DataFrame(selected).empty:
-            row = selected[0]
-            st.markdown("### 🎯 Selected Expense")
-            st.write(row)
-
-            c1, c2 = st.columns(2)
-            with c1:
-                if st.button("✏️ Edit Selected", key=f"edit_{row['Expense ID']}"):
-                    st.session_state.editing_expense = {
-                        "Expense ID": row["Expense ID"],
-                        "Expense Name": row["Expense Name"],
-                        "Amount": row["Amount"],
-                        "Expense Date": row["Expense Date"],
-                        "Category": row["Category"],
-                    }
-                    st.session_state.current_screen = "inline_edit"
-                    st.rerun()
-
-            with c2:
-                if st.button("🗑️ Delete Selected", key=f"del_{row['Expense ID']}"):
-                    run_async(delete_expense(int(row["Expense ID"])))
-                    st.success("Deleted successfully.")
-                    st.rerun()
-        else:
-            st.info("Select a row to show Edit/Delete options.")
+	# Defensive check
+	if isinstance(selected, list) and len(selected) > 0 and isinstance(selected[0], dict):
+	    row = selected[0]
+	    st.markdown("### 🎯 Selected Expense")
+	    st.write(row)
+	
+	    c1, c2 = st.columns(2)
+	    with c1:
+	        if st.button("✏️ Edit Selected", key=f"edit_{row['Expense ID']}"):
+	            st.session_state.editing_expense = {
+	                "Expense ID": row["Expense ID"],
+	                "Expense Name": row["Expense Name"],
+	                "Amount": row["Amount"],
+	                "Expense Date": row["Expense Date"],
+	                "Category": row["Category"],
+	            }
+	            st.session_state.current_screen = "inline_edit"
+	            st.rerun()
+	
+	    with c2:
+	        if st.button("🗑️ Delete Selected", key=f"del_{row['Expense ID']}"):
+	            run_async(delete_expense(int(row["Expense ID"])))
+	            st.success("Deleted successfully.")
+	            st.rerun()
+	else:
+	    st.info("Select a row to show Edit/Delete options.")
 
     # Logout
     if st.button("Logout"):
