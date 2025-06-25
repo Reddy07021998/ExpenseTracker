@@ -217,29 +217,28 @@ async def update_expense(expense_id, user_id, expense_name, amount, expense_date
             'category_id': category_id
         }).eq('expense_id', expense_id).eq('user_id', user_id).execute()
 
-        # Handle the response
-        if response.status_code == 204:
+        # Updated response handling
+        if hasattr(response, 'error') and response.error:
+            st.error(f"Error updating expense: {response.error}")
+            logging.error(f"Error updating expense: {response.error}")
+        elif hasattr(response, 'data'):
             st.success("Expense updated successfully!")
         else:
-            st.error(f"Error updating expense: {response.error}")
-    except Exception as e:
-        st.error(f"Error updating expense: {e}")
-        logging.error(f"Error updating expense: {e}")
+            st.warning("No response data, but update request was sent.")
 
 # Function to delete an expense
 async def delete_expense(expense_id):
-    try:
-        response = supabase.table('expenses').delete().eq('expense_id', expense_id).execute()
-        if response.status_code == 204:
+    try:		
+		response = supabase.table('expenses').delete().eq('expense_id', expense_id).execute()
+
+        # Updated response handling
+        if hasattr(response, 'error') and response.error:
+            st.error(f"Error deleting expense: {response.error}")
+            logging.error(f"Error deleting expense: {response.error}")
+        elif hasattr(response, 'data'):
             st.success("Expense deleted successfully!")
         else:
-            error_message = f"Error deleting expense. Status code: {response.status_code}, Response: {response}"
-            st.error(error_message)
-            logging.error(error_message)
-    except Exception as e:
-        error_message = f"Exception during deletion of expense ID {expense_id}: {e}"
-        st.error(error_message)
-        logging.error(error_message)
+            st.warning("No response data, but delete request was sent.")
 
 # Helper function to run async code within the synchronous environment
 def run_async(coroutine_func):
