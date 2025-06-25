@@ -322,66 +322,95 @@ elif st.session_state.current_screen == "register":
 # Main Menu Screen
 # Main Menu Screen
 elif st.session_state.current_screen == "main_menu":
-    st.title("Expense Tracker Dashboard")
-
-    # Header Section
-    st.markdown("""
-        <div style='display: flex; justify-content: space-between; align-items: center;'>
-            <h2 style='margin: 0;'>💸 Expense Details</h2>
-        </div>
-    """, unsafe_allow_html=True)
-
-    # Floating Action Button (FAB) Menu
     st.markdown("""
         <style>
-            .fab-container {
-                position: fixed;
-                top: 100px;
-                right: 30px;
-                z-index: 9999;
-                display: flex;
-                flex-direction: column;
-                align-items: flex-end;
+            /* Remove right scroll bar */
+            ::-webkit-scrollbar {
+                width: 0px;
+                background: transparent;
             }
 
-            .fab-button {
-                background-color: #4CAF50;
-                color: white;
-                border: none;
-                border-radius: 50px;
-                padding: 10px 20px;
-                margin-top: 8px;
+            /* Floating profile image button */
+            .profile-button {
+                position: absolute;
+                top: 20px;
+                right: 20px;
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                overflow: hidden;
+                border: 2px solid #ccc;
                 cursor: pointer;
-                font-size: 14px;
-                box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-                transition: background-color 0.3s ease;
             }
 
-            .fab-button:hover {
-                background-color: #45a049;
+            .profile-button img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+
+            .profile-menu {
+                position: absolute;
+                top: 70px;
+                right: 20px;
+                background: white;
+                box-shadow: 0 0 10px rgba(0,0,0,0.1);
+                border-radius: 10px;
+                padding: 10px;
+                z-index: 999;
+                width: 200px;
             }
         </style>
-
-        <div class="fab-container">
-            <form method="post">
-                <button name="menu_action" value="add_expense" class="fab-button">➕ Add Expense</button>
-                <button name="menu_action" value="refresh" class="fab-button">🔄 Refresh</button>
-                <button name="menu_action" value="chart_view" class="fab-button">📊 Chart View</button>
-            </form>
-        </div>
     """, unsafe_allow_html=True)
 
-    # Handle FAB actions
-    menu_action = st.query_params.get("menu_action")
-    if menu_action:
-        if menu_action == "add_expense":
-            st.session_state.current_screen = "add_expense"
-        elif menu_action == "refresh":
-            pass
-        elif menu_action == "chart_view":
-            st.session_state.current_screen = "heatmap_view"
-        st.query_params.clear()
+    # Profile Dropdown Toggle
+    if "show_profile" not in st.session_state:
+        st.session_state.show_profile = False
+
+    col1, col2 = st.columns([9, 1])
+    with col2:
+        if st.button("", key="profile_click", help="Profile", use_container_width=True):
+            st.session_state.show_profile = not st.session_state.show_profile
+        st.markdown(
+            f"<div class='profile-button'><img src='https://i.pravatar.cc/300?u={st.session_state.user_id}'></div>",
+            unsafe_allow_html=True,
+        )
+
+    if st.session_state.show_profile:
+        st.markdown(f"""
+            <div class='profile-menu'>
+                <b>{st.session_state.user_name}</b><br>
+                <small>{st.session_state.user_email}</small><br><br>
+                <form method='post'>
+                    <button type='submit' name='logout_btn' style='background-color: red; color: white; width: 100%; border: none; padding: 8px; border-radius: 6px;'>Logout</button>
+                </form>
+            </div>
+        """, unsafe_allow_html=True)
+
+    # Logout
+    if st.session_state.get("logout_btn") is not None:
+        st.session_state.user_id = None
+        st.session_state.current_screen = "login"
         st.rerun()
+
+    st.markdown("""
+        <h1 style='font-size: 36px; margin-bottom: 0;'>Expense Tracker Dashboard</h1>
+        <h3 style='margin-top: 5px;'>💸 Expense Details</h3>
+    """, unsafe_allow_html=True)
+
+    # Action Buttons
+    colA, colB, colC = st.columns([1, 1, 1])
+    with colA:
+        if st.button("➕ Add Expense"):
+            st.session_state.current_screen = "add_expense"
+            st.rerun()
+    with colB:
+        if st.button("🔄 Refresh"):
+            st.rerun()
+    with colC:
+        if st.button("📊 Chart View"):
+            st.session_state.current_screen = "heatmap_view"
+            st.rerun()
 
     # Fetch data
     categories_df = run_async(fetch_categories())
@@ -390,25 +419,17 @@ elif st.session_state.current_screen == "main_menu":
     if not expenses_df.empty:
         expenses_df["Expense Date"] = pd.to_datetime(expenses_df["Expense Date"])
 
-        # Build grid
         gb = GridOptionsBuilder.from_dataframe(expenses_df)
         gb.configure_pagination(paginationAutoPageSize=False, paginationPageSize=10)
         gb.configure_default_column(editable=True, groupable=True)
         gb.configure_selection("single", use_checkbox=True)
         gb.configure_column("Expense Name", editable=True)
         gb.configure_column("Amount", editable=True)
-        gb.configure_column(
-            "Expense Date",
-            editable=True,
-            type=["dateColumnFilter", "customDateTimeFormat"],
-            custom_format_string="yyyy-MM-dd",
-            filterParams={"browserDatePicker": True},
-        )
+        gb.configure_column("Expense Date", editable=True, type=["dateColumnFilter", "customDateTimeFormat"], custom_format_string="yyyy-MM-dd", filterParams={"browserDatePicker": True})
         gb.configure_column("Category", editable=False, filter="agSetColumnFilter")
         grid_options = gb.build()
         grid_options["paginationPageSizeSelector"] = [10, 20, 50, 100]
 
-        # Render grid
         grid_response = AgGrid(
             expenses_df,
             gridOptions=grid_options,
@@ -421,28 +442,21 @@ elif st.session_state.current_screen == "main_menu":
             width="100%",
         )
 
-        # Handle selected row
         selected = grid_response.get("selected_rows", [])
-        if isinstance(selected, list) and len(selected) > 0 and isinstance(selected[0], dict):
+        if selected and isinstance(selected[0], dict):
             row = selected[0]
             st.markdown("### 🎯 Selected Expense")
             st.write(row)
 
-            edit_exp_col, del_exp_col = st.columns([1, 1])
-            with edit_exp_col:
-                if st.button("✏️ Edit Selected", key=f"edit_{row['Expense ID']}"):
-                    st.session_state.editing_expense = {
-                        "Expense ID": row["Expense ID"],
-                        "Expense Name": row["Expense Name"],
-                        "Amount": row["Amount"],
-                        "Expense Date": row["Expense Date"],
-                        "Category": row["Category"],
-                    }
+            c1, c2 = st.columns(2)
+            with c1:
+                if st.button("✏️ Edit", key=f"edit_{row['Expense ID']}"):
+                    st.session_state.editing_expense = row
                     st.session_state.current_screen = "inline_edit"
                     st.rerun()
 
-            with del_exp_col:
-                if st.button("🗑️ Delete Selected", key=f"del_{row['Expense ID']}"):
+            with c2:
+                if st.button("🗑️ Delete", key=f"del_{row['Expense ID']}"):
                     run_async(delete_expense(int(row["Expense ID"])))
                     st.success("Deleted successfully.")
                     st.rerun()
