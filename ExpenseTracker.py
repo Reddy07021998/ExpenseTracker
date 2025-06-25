@@ -320,6 +320,7 @@ elif st.session_state.current_screen == "register":
         st.rerun()
 
 # Main Menu Screen
+# Main Menu Screen
 elif st.session_state.current_screen == "main_menu":
     st.title("Expense Tracker Dashboard")
 
@@ -338,6 +339,8 @@ elif st.session_state.current_screen == "main_menu":
                 st.session_state.current_screen = "heatmap_view"
                 st.rerun()
 
+    st.subheader("💸 Expense Details")
+
     # Fetch categories and expenses
     categories_df = run_async(fetch_categories())
     expenses_df = run_async(fetch_expenses(st.session_state.user_id))
@@ -348,7 +351,8 @@ elif st.session_state.current_screen == "main_menu":
 
         # Configure AG Grid
         gb = GridOptionsBuilder.from_dataframe(expenses_df)
-        gb.configure_pagination(paginationAutoPageSize=False, paginationPageSize=10)
+        gb.configure_pagination(paginationAutoPageSize=False, paginationPageSize=10,
+                                 paginationPageSizeSelector=[10, 20, 50, 100])
         gb.configure_default_column(editable=True, groupable=True)
         gb.configure_selection("single", use_checkbox=True)
         gb.configure_column("Expense Name", editable=True)
@@ -367,32 +371,39 @@ elif st.session_state.current_screen == "main_menu":
         grid_response = AgGrid(
             expenses_df,
             gridOptions=grid_options,
-            update_mode=GridUpdateMode.VALUE_CHANGED,  # auto save when editing ends
+            update_mode=GridUpdateMode.VALUE_CHANGED,
             data_return_mode=DataReturnMode.FILTERED_AND_SORTED,
             fit_columns_on_grid_load=True,
             enable_enterprise_modules=True,
             allow_unsafe_jscode=True,
             height=400,
-            width='100%',
-            reload_data=False
+            width='100%'
         )
 
-        # Handle Auto-Save on Edit
+        # Auto-save only changed rows
         updated_df = pd.DataFrame(grid_response["data"])
-        for idx in range(len(expenses_df)):
-            if not expenses_df.iloc[idx].equals(updated_df.iloc[idx]):
-                updated = updated_df.iloc[idx]
-                run_async(update_expense(
-                    expense_id=int(updated["Expense ID"]),
-                    user_id=int(st.session_state.user_id),
-                    expense_name=updated["Expense Name"],
-                    amount=float(updated["Amount"]),
-                    expense_date=pd.to_datetime(updated["Expense Date"]).isoformat(),
-                    category_id=int(categories_df[categories_df["category_name"] == updated["Category"]]["category_id"].values[0])
-                ))
-                st.success(f"Row {idx + 1} updated successfully.")
+        changed_indices = [
+            idx for idx in range(len(original_df))
+            if not original_df.iloc[idx].equals(pd.Series(updated_df.iloc[idx]))
+        ]
 
-        # Row selection for manual actions
+        if changed_indices:
+            for idx in changed_indices:
+                updated = updated_df.iloc[idx]
+                try:
+                    run_async(update_expense(
+                        expense_id=int(updated["Expense ID"]),
+                        user_id=int(st.session_state.user_id),
+                        expense_name=updated["Expense Name"],
+                        amount=float(updated["Amount"]),
+                        expense_date=pd.to_datetime(updated["Expense Date"]).isoformat(),
+                        category_id=int(categories_df[categories_df["category_name"] == updated["Category"]]["category_id"].values[0])
+                    ))
+                except Exception as e:
+                    st.error(f"Error updating row {idx + 1}: {e}")
+            st.success(f"✅ {len(changed_indices)} record(s) updated successfully.")
+
+        # Row selection popup actions
         selected_rows = grid_response.get("selected_rows", [])
         if selected_rows:
             selected = selected_rows[0]
@@ -404,23 +415,22 @@ elif st.session_state.current_screen == "main_menu":
                 "Category": selected["Category"]
             }
 
-            st.markdown("### 🎯 Selected Expense")
-            st.write(selected_expense)
-
-            col1, col2 = st.columns(2)
-            with col1:
-                if st.button("✏️ Edit Selected"):
-                    st.session_state.editing_expense = selected_expense
-                    st.session_state.current_screen = "inline_edit"
-                    st.rerun()
-            with col2:
-                if st.button("🗑️ Delete Selected"):
-                    run_async(delete_expense(int(selected_expense["Expense ID"])))
-                    st.rerun()
+            with st.expander("🎯 Selected Row Actions", expanded=True):
+                st.write(selected_expense)
+                col1, col2 = st.columns(2)
+                with col1:
+                    if st.button("✏️ Edit Selected"):
+                        st.session_state.editing_expense = selected_expense
+                        st.session_state.current_screen = "inline_edit"
+                        st.rerun()
+                with col2:
+                    if st.button("🗑️ Delete Selected"):
+                        run_async(delete_expense(int(selected_expense["Expense ID"])))
+                        st.rerun()
         else:
-            st.info("Select a row to view options.")
+            st.info("Select a row to view Edit/Delete options.")
 
-    # Logout button
+    # Logout Button
     if st.button("Logout"):
         st.session_state.user_id = None
         st.session_state.current_screen = "login"
